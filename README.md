@@ -1,2 +1,2 @@
 # dsa
-my daily dosa practicing
+my daily dsa practicing
