@@ -14,22 +14,22 @@ public class solution {
              else
                  return new int[0][0];
          }
-     int op2[][]=helper(input,k-input[si],si+1);
      int op1[][]=helper(input,k,si+1);
+     int op2[][]=helper(input,k-input[si],si+1);
+     
      int output[][]=new int[op1.length+op2.length][];
      int l=0;
      for(int i=0;i<op1.length;i++){
-         output[l][j]=op2[i];
+         output[l]=op1[i];
          l++;
      }
      for(int i=0;i<op2.length;i++){
          output[l]=new int[op2[i].length+1];
          output[l][0]=input[si];
-         for(int j=0;j<op1[i].length;j++){
+         for(int j=0;j<op2[i].length;j++){
              output[l][j+1]=op2[i][j];
          }
        l++;
      }
          return output;}
 }
-
