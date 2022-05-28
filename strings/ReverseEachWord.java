@@ -1,3 +1,7 @@
+i/p: abc def ghi
+o/p: cba fed ihg
+
+
 public class ReverseEachWord {
 
       public static String reverseEachWord(String str){
