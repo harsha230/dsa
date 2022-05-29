@@ -8,42 +8,39 @@ public class Solution {
 	 * public BinaryTreeNode(T data) { this.data = data; } }
 	 */
 
+	public static BinaryTreeNode<Integer> getLCAUtil (BinaryTreeNode<Integer> root, int a, int b) {
 
-	
-	public static int getLCA(BinaryTreeNode<Integer> root, int a, int b) {
-		if(root==null)
-             return -1;
-         int c=-1;
-         if(root.data==a || root.data==b)
-             return root.data;
-
-        else if(a<root.data && b>root.data || a>root.data && b<root.data)
-         {
-              c=getLCA(root.left,a,b);
-             int d=getLCA(root.right,a,b);
-             if(c==-1 && d==-1)
-                 return -1;
-             else if(c==-1 && d!=-1)
-                 return  d;
-             else if(c!=-1 && d==-1)
-                 return c;
-             else
-                 return root.data;
-         }
-
-          else if(a<root.data &&b<root.data)
-         {
-              c=getLCA(root.left,a,b);
-         }
-        else if(a>root.data &&b>root.data)
-         {
-              c=getLCA(root.right,a,b);
-         }
-
-         if(c!=-1)
-             return c;
-          else
-             return -1;
-
+	if(root==null || root.data==a || root.data==b)
+	{
+		return root;
 	}
+	if(root.data<a && root.data<b)
+	{
+		return getLCAUtil(root.right, a, b);
+	}
+	else if (root.data>a && root.data>b)
+	{
+		return getLCAUtil (root.left, a, b);
+	}
+
+	BinaryTreeNode<Integer> leftLCA = getLCAUtil(root.left, a, b);
+	BinaryTreeNode<Integer> rightLCA = getLCAUtil (root.right, a, b); 
+	if(leftLCA!=null && rightLCA!=null)
+	{
+		return root;
+	}
+	else if(leftLCA!=null)
+	{
+		return leftLCA;
+	}
+	return rightLCA;
+}
+
+
+
+public static int getLCA (BinaryTreeNode<Integer> root, int a, int b) {
+	BinaryTreeNode<Integer> node= getLCAUtil (root, a,b);
+	return (node==null) ? -1 node.data;
+  }
+	
 }
