@@ -1,0 +1,99 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class NextPermutationBruteForce {
+
+    // Function to compute next permutation using brute force
+    public static void nextPermutation(int[] nums) {
+        // Generate all permutations of nums
+        List<List<Integer>> permutations = new ArrayList<>();
+        
+        permute(nums, 0, permutations);
+        
+        // Sort the list of permutations lexicographically
+        permutations.sort((a, b) -> {
+            for (int i = 0; i < a.size(); i++) {
+                if (!a.get(i).equals(b.get(i))) {
+                    return a.get(i) - b.get(i);
+                }
+            }
+            return 0;
+        });
+        
+        // Find the current permutation in the sorted list
+        int idx = 0;
+        for (int i = 0; i < permutations.size(); i++) {
+            if (isSameList(permutations.get(i), nums)) {
+                idx = i;
+                break;
+            }
+        }
+        
+        // Replace nums with the next permutation, if possible
+        if (idx < permutations.size() - 1) {
+            List<Integer> nextPerm = permutations.get(idx + 1);
+            for (int i = 0; i < nums.length; i++) {
+                nums[i] = nextPerm.get(i);
+            }
+        } else {
+            // If the current permutation is the largest, sort nums in ascending order
+            Arrays.sort(nums);
+        }
+    }
+
+    // Helper function to generate permutations using backtracking
+    private static void permute(int[] nums, int start, List<List<Integer>> result) {
+        if (start == nums.length) {
+            List<Integer> permutation = new ArrayList<>();
+            for (int num : nums) {
+                permutation.add(num);
+            }
+            result.add(permutation);
+            return;
+        }
+  
+        for (int i = start; i < nums.length; i++) {
+            swap(nums, start, i);
+            permute(nums, start + 1, result);
+            swap(nums, start, i);
+        }
+    }
+
+    // Helper function to swap elements
+    private static void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+
+    // Helper function to compare two lists for equality
+    private static boolean isSameList(List<Integer> a, int[] b) {
+        if (a.size() != b.length) {
+            return false;
+        }
+        for (int i = 0; i < a.size(); i++) {
+            if (!a.get(i).equals(b[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        // Example 1
+        int[] nums1 = {1, 2, 3};
+        nextPermutation(nums1);
+        System.out.println("Next permutation: " + Arrays.toString(nums1));
+
+        // Example 2
+        int[] nums2 = {3, 2, 1};
+        nextPermutation(nums2);
+        System.out.println("Next permutation: " + Arrays.toString(nums2));
+
+        // Example 3
+        int[] nums3 = {1, 1, 5};
+        nextPermutation(nums3);
+        System.out.println("Next permutation: " + Arrays.toString(nums3));
+    }
+}
