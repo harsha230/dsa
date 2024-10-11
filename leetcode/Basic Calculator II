@@ -1,0 +1,57 @@
+import java.util.Deque;
+import java.util.ArrayDeque;
+
+class Solution {
+    public int calculate(String s) {
+        // Check for null or empty input
+        if (s == null || s.isEmpty())
+            return 0;
+
+        int current = 0; // Current number being processed
+        Deque<Integer> st = new ArrayDeque<>(); // Stack to hold intermediate results
+        char op = '+'; // Initial operator is set to '+'
+        int res = 0; // Result of the calculation
+        int last = 0; // Last processed value
+
+        // Loop through each character in the string
+        for (int i = 0; i < s.length(); i++) {
+            char cc = s.charAt(i); // Current character
+
+            // Build the current number from consecutive digits
+            if (Character.isDigit(cc)) {
+                current = current * 10 + (cc - '0'); // Construct the current number
+            }
+
+            // If we encounter an operator or reach the end of the string
+            if (!Character.isDigit(cc) && cc != ' ' || i == s.length() - 1) {
+                // Process the previous operator
+                if (op == '+') {
+                    // If the last operator was '+', add the last number to result
+                    res += last;
+                    last = current; // Set last to current number
+                } 
+                else if (op == '-') {
+                    // If the last operator was '-', add the last number to result
+                    res += last; 
+                    last = -current; // Negate the current number for subtraction
+                } 
+                else if (op == '*') {
+                    // If the last operator was '*', multiply with the last number
+                    last = last * current;
+                } 
+                else if (op == '/') {
+                    // If the last operator was '/', divide the last number
+                    last = last / current;
+                }
+
+                // Reset current number and update the operator
+                current = 0; 
+                op = cc; // Update operator to current character
+            }
+        }
+
+        // Add the last processed number to the result
+        res += last; 
+        return res; // Return the final calculated result
+    }
+}
