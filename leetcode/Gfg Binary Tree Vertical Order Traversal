@@ -1,0 +1,74 @@
+Gfg
+
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+
+class Pair{
+  int hd;
+  TreeNode Node;
+  Pair(TreeNode n, int h){
+    this.Node=n;
+    this.hd=h;
+  }
+
+
+}
+class Solution {
+    public List<List<Integer>> verticalOrder(TreeNode root) {
+     
+     if(root==null){
+        return new ArrayList<List<Integer>>();
+     }
+    List<List<Integer>> res= new ArrayList<>();
+    TreeMap<Integer, ArrayList<Integer>> map= new TreeMap<Integer ,ArrayList<Integer>>();
+
+    Queue<Pair> q=new LinkedList<>();
+    Pair p=new Pair(root, 0);
+    q.add(p);
+    while(q.size()!=0){
+        Pair curr= q.poll();
+        int h=curr.hd;
+        TreeNode cur=curr.Node;
+        if(map.containsKey(h)){
+            map.get(h).add(cur.val);
+        }
+        else{
+            ArrayList<Integer> al=new ArrayList<>();
+            al.add(cur.val);
+            map.put(h,al);
+        }
+        if(cur.left!=null){
+        
+            q.add(new Pair(cur.left,h-1));
+        }
+        if(cur.right!=null)
+        {     
+            q.add(new Pair(cur.right,h+1));
+            
+            }
+        }
+    
+
+    for(Map.Entry<Integer, ArrayList<Integer>> ali: map.entrySet()){
+        res.add(ali.getValue());
+    }
+
+
+
+   return res;
+    }
+}
