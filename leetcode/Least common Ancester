@@ -1,0 +1,24 @@
+class Solution {
+    public Node lowestCommonAncestor(Node p, Node q) {
+        // Step 1: Create a set to store the ancestors of p
+        HashSet<Node> ancestors = new HashSet<>();
+        
+        // Traverse up from p to the root, storing all ancestors
+        while (p != null) {
+            ancestors.add(p);
+            p = p.parent;
+        }
+        
+        // Step 2: Traverse up from q to find the first ancestor that is also an ancestor of p
+        while (q != null) {
+            if (ancestors.contains(q)) {
+                return q;  // Found the LCA
+            }
+            q = q.parent;
+        }
+        
+        return null;  // In case there is no common ancestor
+    }
+}
+
+
