@@ -1,0 +1,40 @@
+class SparseVector {
+    // Store only non-zero elements and their indices
+    private List<int[]> nonZeroElements;
+
+    // Constructor to initialize the sparse vector
+    SparseVector(int[] nums) {
+        nonZeroElements = new ArrayList<>();
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] != 0) {
+                nonZeroElements.add(new int[]{i, nums[i]});
+            }
+        }
+    }
+
+    // Function to compute the dot product of two sparse vectors
+    public int dotProduct(SparseVector vec) {
+        List<int[]> v1 = this.nonZeroElements;
+        List<int[]> v2 = vec.nonZeroElements;
+
+        int i = 0, j = 0, result = 0;
+
+        // Use two pointers to traverse both lists
+        while (i < v1.size() && j < v2.size()) {
+            int index1 = v1.get(i)[0];
+            int index2 = v2.get(j)[0];
+
+            if (index1 == index2) {
+                result += v1.get(i)[1] * v2.get(j)[1];
+                i++;
+                j++;
+            } else if (index1 < index2) {
+                i++;
+            } else {
+                j++;
+            }
+        }
+
+        return result;
+    }
+}Dot Product of Two Sparse Vectors
