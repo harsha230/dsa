@@ -1,0 +1,126 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class Solution {
+    // Define a mapping of digits to corresponding letters
+    private static final String[] KEYPAD = {
+        "",     // 0
+        "",     // 1
+        "abc",  // 2
+        "def",  // 3
+        "ghi",  // 4
+        "jkl",  // 5
+        "mno",  // 6
+        "pqrs", // 7
+        "tuv",  // 8
+        "wxyz"  // 9
+    };
+
+    public List<String> letterCombinations(String digits) {
+        // List to store the result
+        List<String> result = new ArrayList<>();
+        
+        // Base case: if the input is empty, return an empty list
+        if (digits == null || digits.length() == 0) {
+            return result;
+        }
+        
+        // Start backtracking to generate combinations
+        backtrack(result, digits, "", 0);
+        return result;
+    }
+
+    // Helper method for backtracking
+    private void backtrack(List<String> result, String digits, String current, int index) {
+        // If the current combination is complete, add it to the result list
+        if (index == digits.length()) {
+            result.add(current);
+            return;
+        }
+        
+        // Get the letters corresponding to the current digit
+        String letters = KEYPAD[digits.charAt(index) - '0'];
+        
+        // Loop through each letter and continue building combinations
+        for (char letter : letters.toCharArray()) {
+            backtrack(result, digits, current + letter, index + 1);
+        }
+    }
+
+    // Main method for testing
+    public static void main(String[] args) {
+        Solution solution = new Solution();
+        System.out.println(solution.letterCombinations("23")); // Output: [ad, ae, af, bd, be, bf, cd, ce, cf]
+        System.out.println(solution.letterCombinations(""));   // Output: []
+        System.out.println(solution.letterCombinations("2"));  // Output: [a, b, c]
+    }
+}
+2
+
+class Solution {
+    private List<String> combinations = new ArrayList<>();
+    private Map<Character, String> letters = Map.of(
+        '2',
+        "abc",
+        '3',
+        "def",
+        '4',
+        "ghi",
+        '5',
+        "jkl",
+        '6',
+        "mno",
+        '7',
+        "pqrs",
+        '8',
+        "tuv",
+        '9',
+        "wxyz"
+    );
+    private String phoneDigits;
+
+    public List<String> letterCombinations(String digits) {
+        // If the input is empty, immediately return an empty answer array
+        if (digits.length() == 0) {
+            return combinations;
+        }
+
+        // Initiate backtracking with an empty path and starting index of 0
+        phoneDigits = digits;
+        backtrack(0, new StringBuilder());
+        return combinations;
+    }
+
+    private void backtrack(int index, StringBuilder path) {
+        // If the path is the same length as digits, we have a complete combination
+        if (path.length() == phoneDigits.length()) {
+            combinations.add(path.toString());
+            return; // Backtrack
+        }
+
+        // Get the letters that the current digit maps to, and loop through them
+        String possibleLetters = letters.get(phoneDigits.charAt(index));
+        for (char letter : possibleLetters.toCharArray()) {
+            // Add the letter to our current path
+            path.append(letter);
+            // Move on to the next digit
+            backtrack(index + 1, path);
+            // Backtrack by removing the letter before moving onto the next
+            path.deleteCharAt(path.length() - 1);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
