@@ -1,0 +1,35 @@
+class Solution {
+      public static int[][] intervalIntersection(int[][] firstList, int[][] secondList) {
+             // List to hold the intersections
+                List<int[]> intersections = new ArrayList<>(); // List to hold intersections
+        
+        int i = 0; // Pointer for firstList
+        int j = 0; // Pointer for secondList
+
+        // Loop until we have traversed either list completely
+        while (i < firstList.length && j < secondList.length) {
+            // Get the current intervals
+            int[] interval1 = firstList[i];
+            int[] interval2 = secondList[j];
+
+            // Check if they overlap
+            if (interval1[0] <= interval2[1] && interval2[0] <= interval1[1]) {
+                // Calculate the intersection
+                int start = Math.max(interval1[0], interval2[0]);
+                int end = Math.min(interval1[1], interval2[1]);
+                intersections.add(new int[]{start, end}); // Add intersection to list
+            }
+
+            // Move to the next interval
+            if (interval1[1] < interval2[1]) {
+                i++; // Move pointer in firstList
+            } else {
+                j++; // Move pointer in secondList
+            }
+        }
+
+        return intersections.toArray(new int[intersections.size()][]); // Return the list of intersections
+    
+    }
+
+}
