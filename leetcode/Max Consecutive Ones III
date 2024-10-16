@@ -1,0 +1,28 @@
+class Solution {
+    public int longestOnes(int[] nums, int k) {
+        int left = 0, maxLength = 0, zeroCount = 0;
+
+        for (int right = 0; right < nums.length; right++) {
+            if (nums[right] == 0) {
+                zeroCount++;
+            }
+
+            // If zeroCount exceeds k, shrink the window from the left
+            while (zeroCount > k) {
+                if (nums[left] == 0) {
+                    zeroCount--;
+                }
+                left++;
+            }
+
+            // Update maxLength with the current valid window size
+            maxLength = Math.max(maxLength, right - left + 1);
+        }
+
+        return maxLength;
+    }
+}
+
+Time Complexity: O(N), where N is the number of elements in the array. In worst case we might end up visiting every element of array twice, once by left pointer and once by right pointer.
+
+Space Complexity: O(1). We do not use any extra space.
