@@ -1,0 +1,101 @@
+
+
+class Solution {
+
+    public int maximumSwap(int num) {
+        char[] numArr = Integer.toString(num).toCharArray();
+        int n = numArr.length;
+        int[] maxRightIndex = new int[n];
+
+        maxRightIndex[n - 1] = n - 1;
+        for (int i = n - 2; i >= 0; --i) {
+            maxRightIndex[i] = (numArr[i] > numArr[maxRightIndex[i + 1]])
+                ? i
+                : maxRightIndex[i + 1];
+        }
+
+        for (int i = 0; i < n; ++i) {
+            if (numArr[i] < numArr[maxRightIndex[i]]) {
+                char temp = numArr[i];
+                numArr[i] = numArr[maxRightIndex[i]];
+                numArr[maxRightIndex[i]] = temp;
+                return Integer.parseInt(new String(numArr));
+            }
+        }
+
+        return num;
+    }
+}
+Time complexity: O(n)
+Space complexity: O(n)
+
+Approach 3: Suboptimal Greedy
+
+public class Solution {
+
+    public int maximumSwap(int num) {
+        String numStr = Integer.toString(num);
+        int n = numStr.length();
+        int[] lastSeen = new int[10]; // Store the last occurrence of each digit
+
+        // Record the last occurrence of each digit
+        for (int i = 0; i < n; ++i) {
+            lastSeen[numStr.charAt(i) - '0'] = i;
+        }
+
+        // Traverse the string to find the first digit that can be swapped with a larger one
+        for (int i = 0; i < n; ++i) {
+            for (int d = 9; d > numStr.charAt(i) - '0'; --d) {
+                if (lastSeen[d] > i) {
+                    //Perform the swap
+                    char[] arr = numStr.toCharArray();
+                    char temp = arr[i];
+                    arr[i] = arr[lastSeen[d]];
+                    arr[lastSeen[d]] = temp;
+                    numStr = new String(arr);
+
+                    return Integer.parseInt(numStr); // Return the new number immediately after the swap
+                }
+            }
+        }
+
+        return num; // Return the original number if no swap can maximize it
+    }
+}
+Time complexity: O(n)
+Space complexity: O(n)
+
+Approach 4: Space Optimized Greedy
+class Solution {
+       public int maximumSwap(int num) {
+        char[] numStr = Integer.toString(num).toCharArray();
+        int n = numStr.length;
+        int maxDigitIndex = -1, swapIdx1 = -1, swapIdx2 = -1;
+
+        // Traverse the string from right to left, tracking the max digit and
+        // potential swap
+        for (int i = n - 1; i >= 0; --i) {
+            if (maxDigitIndex == -1 || numStr[i] > numStr[maxDigitIndex]) {
+                maxDigitIndex = i; // Update the index of the max digit
+            } else if (numStr[i] < numStr[maxDigitIndex]) {
+                swapIdx1 = i; // Mark the smaller digit for swapping
+                swapIdx2 = maxDigitIndex; // Mark the larger digit for swapping
+            }
+        }
+
+        // Perform the swap if a valid swap is found
+        if (swapIdx1 != -1 && swapIdx2 != -1) {
+            char temp = numStr[swapIdx1];
+            numStr[swapIdx1] = numStr[swapIdx2];
+            numStr[swapIdx2] = temp;
+        }
+
+        return Integer.parseInt(new String(numStr)); // Return the new number or the original if no
+        // swap occurred
+    }
+}
+
+
+
+
+
