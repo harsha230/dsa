@@ -1,0 +1,123 @@
+Approach 1: Brute Force
+Intuition & Algorithm
+
+Traverse all the linked lists and collect the values of the nodes into an array.
+Sort and iterate over this array to get the proper value of nodes.
+Create a new sorted linked list and extend it with the new nodes.
+Time complexity : O(NlogN) where N is the total number of nodes.
+Collecting all the values costs O(N) time.
+A stable sorting algorithm costs O(NlogN) time.
+Iterating for creating the linked list costs O(N) time.
+Space complexity : O(N).
+Sorting cost O(N) space (depends on the algorithm you choose).
+Creating a new linked list costs O(N) space.
+
+
+Approach 2: using min heap
+This approach utilizes a min-heap (priority queue) to merge k sorted linked lists efficiently. 
+First, the algorithm initializes the heap with the head node from each of the k lists (if non-empty). 
+The heap always stores the smallest node from the remaining nodes of all lists. Then, it repeatedly extracts the 
+smallest node from the heap and appends it to the result list. If the extracted node has a next node, 
+that next node is pushed into the heap. This process ensures that the nodes are added to the merged list in sorted order. 
+The algorithm continues until all nodes are processed, and finally, the merged sorted list is returned.
+
+Time Complexity:
+The time complexity is O(N log k), where N is the total number of nodes across all the lists and k is the number of linked lists. 
+Inserting and extracting from the heap (priority queue) takes O(log k) time, and this operation is performed N times (once for each node).
+
+Space Complexity:
+The space complexity is O(k), as the heap stores up to k nodes at any time, one from each list. Additionally, space is used for the output linked list.
+
+class Solution {
+    public ListNode mergeKLists(ListNode[] lists) {
+        if (lists == null || lists.length == 0) {
+            return null;
+        }
+
+        // Min-heap to keep track of the smallest node from each list
+        PriorityQueue<ListNode> minHeap = new PriorityQueue<>((a, b) -> a.val - b.val);
+
+        // Initialize the heap with the head nodes of each linked list
+        for (ListNode list : lists) {
+            if (list != null) {
+                minHeap.offer(list);
+            }
+        }
+
+        // Dummy head for the result list
+        ListNode dummy = new ListNode(0);
+        ListNode tail = dummy;
+
+        // While there are nodes to process in the heap
+        while (!minHeap.isEmpty()) {
+            // Extract the node with the smallest value
+            ListNode smallest = minHeap.poll();
+            // Append it to the merged list
+            tail.next = smallest;
+            tail = tail.next;
+
+            // If there's a next node in the list, push it into the heap
+            if (smallest.next != null) {
+                minHeap.offer(smallest.next);
+            }
+        }
+
+        // Return the merged list, starting from dummy.next
+        return dummy.next;
+    }
+}
+Approach 3: Merge with Divide And Conquer
+
+
+class Solution {
+    public ListNode mergeKLists(ListNode[] lists) {
+        int amount = lists.length;
+        int interval = 1;
+        while (interval < amount) {
+            for (int i = 0; i < amount - interval; i += interval * 2) {
+                lists[i] = merge2Lists(lists[i], lists[i + interval]);
+            }
+            interval *= 2;
+        }
+        return amount > 0 ? lists[0] : null;
+    }
+
+    public ListNode merge2Lists(ListNode l1, ListNode l2) {
+        ListNode head = new ListNode(0);
+        ListNode point = head;
+        while (l1 != null && l2 != null) {
+            if (l1.val <= l2.val) {
+                point.next = l1;
+                l1 = l1.next;
+            } else {
+                point.next = l2;
+                l2 = l1;
+                l1 = point.next.next;
+            }
+            point = point.next;
+        }
+        if (l1 == null) {
+            point.next = l2;
+        } else {
+            point.next = l1;
+        }
+        return head.next;
+    }
+}
+
+Time complexity : O(Nlogk) where k is the number of linked lists.
+
+We can merge two sorted linked list in O(n) time where n is the total number of nodes in two lists.
+Sum up the merge process and we can get O(Nlogk)
+Space complexity : O(1)
+
+We can merge two sorted linked lists in O(1) space.
+
+
+
+
+
+
+
+
+
