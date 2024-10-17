@@ -1,0 +1,49 @@
+class Solution {
+    // Create a hash value
+    String getHash(String s) {
+        char[] chars = s.toCharArray();
+        StringBuilder hashKey = new StringBuilder();
+        
+        for (int i = 1; i < chars.length; i++) {
+            hashKey.append((char) ((chars[i] - chars[i - 1] + 26) % 26 + 'a'));
+        }
+        
+        return hashKey.toString();
+    }
+    
+    public List<List<String>> groupStrings(String[] strings) {
+        Map<String, List<String>> mapHashToList = new HashMap<>();
+        
+        // Create a hash_value (hashKey) for each string and append the string
+        // to the list of hash values i.e. mapHashToList["cd"] = ["acf", "gil", "xzc"]
+        for (String str : strings ) {
+            String hashKey = getHash(str);
+            if (mapHashToList.get(hashKey) == null) {
+                mapHashToList.put(hashKey, new ArrayList<>());
+            } 
+            mapHashToList.get(hashKey).add(str);
+        }
+        
+        // Iterate over the map, and add the values to groups
+        List<List<String>> groups = new ArrayList<>();
+        for (List<String> group : mapHashToList.values()) {
+            groups.add(group);
+        }
+        
+        // Return a list of all of the grouped strings
+        return groups;
+    }
+}
+
+Let N be the length of strings and K be the maximum length of a string in strings.
+
+Time complexity: O(N∗K)
+
+We iterate over all N strings and for each string, we iterate over all the characters to generate the Hash value, which takes O(K) time. 
+To sum up, the overall time complexity is O(N∗K).
+
+Space complexity: O(N∗K)
+
+We need to store all the strings plus their Hash values in mapHashToList. In the worst scenario,
+when each string in the given list belongs to a different Hash value, the maximum number of strings stored in mapHashToList is 2∗N. 
+Each string takes at most O(K) space. Hence the overall space complexity is O(N∗K).
