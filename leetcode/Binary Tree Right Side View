@@ -1,0 +1,127 @@
+
+Approach 1
+class Solution {
+    public List<Integer> rightSideView(TreeNode root) {
+        if (root == null) return new ArrayList<Integer>();
+
+        ArrayDeque<TreeNode> nextLevel = new ArrayDeque() {
+            {
+                offer(root);
+            }
+        };
+        ArrayDeque<TreeNode> currLevel = new ArrayDeque();
+        List<Integer> rightside = new ArrayList();
+
+        TreeNode node = null;
+        while (!nextLevel.isEmpty()) {
+            // prepare for the next level
+            currLevel = nextLevel;
+            nextLevel = new ArrayDeque<>();
+
+            while (!currLevel.isEmpty()) {
+                node = currLevel.poll();
+
+                // add child nodes of the current level
+                // in the queue for the next level
+                if (node.left != null) nextLevel.offer(node.left);
+                if (node.right != null) nextLevel.offer(node.right);
+            }
+
+            // The current level is finished.
+            // Its last element is the rightmost one.
+            if (currLevel.isEmpty()) rightside.add(node.val);
+        }
+        return rightside;
+    }
+}
+Time complexity: O(N) since one has to visit each node.
+
+Space complexity: O(D) to keep the queues, where D is a tree diameter. Let's use the last level to estimate the queue size. 
+This level could contain up to N/2 tree nodes in the case of complete binary tree.
+
+Approach 2  BFS: One Queue + Level Size Measurements
+Algorithm
+
+Initiate the list of the right side view rightside.
+
+Initiate the queue by adding a root.
+
+While the queue is not empty:
+
+Write down the length of the current level: levelLength = queue.size().
+
+Iterate over i from 0 to level_length - 1:
+
+Pop the current node from the queue: node = queue.poll().
+
+If i == levelLength - 1, then it's the last node in the current level, push it to rightsize list.
+
+Add first left and then right child node into the queue.
+
+Return rightside.
+
+class Solution {
+    public List<Integer> rightSideView(TreeNode root) {
+        if (root == null) return new ArrayList<Integer>();
+
+        ArrayDeque<TreeNode> queue = new ArrayDeque() {
+            {
+                offer(root);
+            }
+        };
+        List<Integer> rightside = new ArrayList();
+
+        while (!queue.isEmpty()) {
+            int levelLength = queue.size();
+
+            for (int i = 0; i < levelLength; ++i) {
+                TreeNode node = queue.poll();
+
+                // if it's the rightmost element
+                if (i == levelLength - 1) {
+                    rightside.add(node.val);
+                }
+
+                // add child nodes in the queue
+                if (node.left != null) {
+                    queue.offer(node.left);
+                }
+                if (node.right != null) {
+                    queue.offer(node.right);
+                }
+            }
+        }
+        return rightside;
+    }
+}
+The time complexity of the solution is O(N), where N is the total number of nodes in the binary tree. 
+This is because each node is visited exactly once during the level-order traversal (BFS). For each node, we check its children and add them to the queue, ensuring every node is processed once. 
+The space complexity is O(D), where D is the maximum width of the tree, representing the number of nodes at the widest level. 
+In the worst case, for a balanced tree, this can be around N/2, leading to O(N) space complexity. 
+In the case of a skewed tree, where all nodes are aligned to one side, the space complexity remains O(N). 
+Therefore, both time and space complexities are bounded by the number of nodes in the tree.
+
+Approach 4: Recursive DFS
+
+class Solution {
+    List<Integer> rightside = new ArrayList();
+
+    public void helper(TreeNode node, int level) {
+        if (level == rightside.size()) rightside.add(node.val);
+
+        if (node.right != null) helper(node.right, level + 1);
+        if (node.left != null) helper(node.left, level + 1);
+    }
+
+    public List<Integer> rightSideView(TreeNode root) {
+        if (root == null) return rightside;
+
+        helper(root, 0);
+        return rightside;
+    }
+}
+Complexity Analysis
+
+Time complexity: O(N) since one has to visit each node.
+
+Space complexity: O(H) to keep the recursion stack, where H is a tree height. The worst-case situation is a skewed tree when H=N.
