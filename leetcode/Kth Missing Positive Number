@@ -1,0 +1,66 @@
+
+Brute 
+For each num, the algorithm checks if num is less than or equal to k. If it is:
+Increment k: This means that we've encountered a number that is part of the sequence of positive integers up to k. 
+If num is equal to or less than k, it indicates that we have found an actual number in the sequence,
+which pushes the next missing positive integer further along. Therefore, we increment k by 1.
+class Solution {
+    public int findKthPositive(int[] arr, int k) {
+        for (int num : arr) {
+            if (num <= k) {
+                k++;
+            } else {
+                break;
+            }
+        }
+        return k;
+    }
+}
+
+Time complexity: O(N) because in the worst case, we have to parse all array elements.
+
+Space complexity: O(1), we don't allocate any additional data structures.
+
+
+
+
+Approach 2
+
+class Solution {
+    public int findKthPositive(int[] arr, int k) {
+        int left = 0, right = arr.length - 1;
+        while (left <= right) {
+            int pivot = left + (right - left) / 2;
+            // If number of positive integers
+            // which are missing before arr[pivot]
+            // is less than k -->
+            // continue to search on the right.
+            if (arr[pivot] - pivot - 1 < k) {
+                left = pivot + 1;
+            // Otherwise, go left.
+            } else {
+                right = pivot - 1;
+            }
+        }
+
+        // At the end of the loop, left = right + 1,
+        // and the kth missing is in-between arr[right] and arr[left].
+        // The number of integers missing before arr[right] is
+        // arr[right] - right - 1 -->
+        // the number to return is
+        // arr[right] + k - (arr[right] - right - 1) = k + left
+        return left + k;
+    }
+}
+
+The approach to finding the k-th missing positive integer from a sorted array involves utilizing a binary search technique to efficiently identify the position 
+where the k-th missing integer would occur. The algorithm begins by initializing two pointers, left and right, to represent the boundaries of the search space 
+within the array. It calculates the middle index, pivot, and determines how many positive integers are missing before the element at that index using the formula 
+arr[pivot] - (pivot + 1). If the number of missing integers is less than k, it adjusts the left pointer to continue searching in the right half; otherwise, 
+it narrows down the search by moving the right pointer leftward. This process continues until the loop exits, at which point left indicates the position where 
+the k-th missing integer lies. The final calculation return left + k provides the k-th missing positive integer by adding k to the index left, effectively 
+offsetting it to find the actual missing integer, thus achieving an efficient O(log n) time complexity due to the binary search method.
+
+Time complexity: O(logN), where N is a number of elements in the input array.
+Space complexity: O(1), we don't allocate any additional data structures.
+
