@@ -1,0 +1,61 @@
+The brute force approach to converting a Binary Search Tree (BST) into a sorted circular doubly linked list involves two main steps: first, performing an
+in-order traversal of the tree to collect all the nodes in a list or array,
+and then iterating through this collection to create the doubly linked list. In this method, you would start by traversing the tree recursively, 
+adding each node to an array or list in the order they are visited 
+(which would be 
+sorted due to the nature of in-order traversal in a BST). Once the nodes are collected, you would then create the doubly linked list by linking the left and right pointers of each node to its predecessor and successor,
+respectively. 
+Finally, to achieve the circular structure, you would link the first and last nodes together. This brute force approach, 
+while straightforward and easy to implement, may not be optimal in terms of space complexity 
+since it requires additional storage for the intermediate list of nodes, making it less efficient than in-place methods that modify the tree directly. 
+The overall time complexity remains O(N) for the traversal and O(N) for the linking, 
+resulting in an overall complexity of O(N) with O(N) space.
+
+
+Approach 1: Recursion
+Optimised (Inplace)
+
+class Solution {
+  // the smallest (first) and the largest (last) nodes
+  Node first = null;
+  Node last = null;
+
+  public void helper(Node node) {
+    if (node != null) {
+      // left
+      helper(node.left);
+
+      // node 
+      if (last != null) {
+        // link the previous node (last)
+        // with the current one (node)
+        last.right = node;
+        node.left = last;
+      }
+      else {
+        // keep the smallest node
+        // to close DLL later on
+        first = node;
+      }
+      last = node;
+
+      // right
+      helper(node.right);
+    }
+  }
+
+  public Node treeToDoublyList(Node root) {
+    if (root == null) return null;
+
+    helper(root);
+
+    // close DLL
+    last.right = first;
+    first.left = last;
+    return first;
+  }
+}
+
+Time complexity : O(N) since each node is processed exactly once.
+
+Space complexity : O(N). We have to keep a recursion stack of the size of the tree height, which is O(logN) for the best case of a completely balanced tree and O(N) for the worst case of a completely unbalanced tree
