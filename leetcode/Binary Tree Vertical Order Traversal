@@ -38,3 +38,10 @@ class Solution {
     return output;
   }
 }
+
+Time Complexity:
+The BFS visits every node exactly once, so the time complexity is O(N), where N is the total number of nodes.
+Accessing and updating the columnTable map takes constant time on average.
+Space Complexity:
+The space complexity is O(N) because the columnTable stores all the nodes in the tree, 
+and the queue used for BFS can hold up to the number of nodes at the widest part of the tree.
