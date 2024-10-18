@@ -1,0 +1,126 @@
+This approach for finding the **longest common prefix** in an array of strings works by progressively shrinking the prefix string. 
+It starts with the first string (`strs[0]`) as the initial prefix, and then compares it to the rest of the strings in the array. 
+For each string, it checks if the current prefix is a prefix of that string using the `indexOf` method. If it's not, the prefix is shortened (by removing one character from the end) until it either becomes a valid prefix for that string or becomes empty. 
+This process continues for all strings in the array. If at any point the prefix becomes empty, the function returns an empty string, indicating no common prefix exists.
+
+### Time Complexity:
+- The worst-case time complexity is **O(S)**, where **S** is the total number of characters in all the strings in the array. 
+In each iteration, we compare the prefix with one of the strings and progressively shrink it. 
+In the worst case, this shrinking operation could involve comparing all characters in all strings.
+
+### Space Complexity:
+- The space complexity is **O(1)**, since the algorithm uses a constant amount of extra space, regardless of the input size. 
+The only additional storage used is for the `prefix` string, which is directly modified and does not depend on the length of the input array.
+
+
+public String longestCommonPrefix(String[] strs) {
+        if (strs.length == 0) return "";
+        String prefix = strs[0];
+        for (int i = 1; i < strs.length; i++) {
+
+        while ( strs[i].indexOf(prefix) != 0)    
+        {
+            prefix = prefix.substring(0, prefix.length() - 1);
+            if (prefix.isEmpty()) 
+                 return "";
+        }
+
+        }
+        return prefix;
+    }
+
+
+Apparoach 2 Vertical Scanning
+
+class Solution {
+    public String longestCommonPrefix(String[] strs) {
+        if (strs == null || strs.length == 0) return "";
+        for (int i = 0; i < strs[0].length(); i++) {
+            char c = strs[0].charAt(i);
+            for (int j = 1; j < strs.length; j++) {
+                if (
+                    i == strs[j].length() || strs[j].charAt(i) != c
+                ) return strs[0].substring(0, i);
+            }
+        }
+        return strs[0];
+    }
+}
+
+
+Time complexity : O(S) , where S is the sum of all characters in all strings.
+In the worst case there will be n equal strings with length m and the algorithm performs S=m⋅n character comparisons.
+Even though the worst case is still the same as Approach 1, in the best case there are at most n⋅minLen comparisons 
+where minLen is the length of the shortest string in the array.
+Space complexity : O(1). We only used constant extra space.
+
+
+Approach 3: Divide and conquer
+
+
+class Solution {
+    public String longestCommonPrefix(String[] strs) {
+        if (strs == null || strs.length == 0) return "";
+        return longestCommonPrefix(strs, 0, strs.length - 1);
+    }
+
+    private String longestCommonPrefix(String[] strs, int l, int r) {
+        if (l == r) {
+            return strs[l];
+        } else {
+            int mid = (l + r) / 2;
+            String lcpLeft = longestCommonPrefix(strs, l, mid);
+            String lcpRight = longestCommonPrefix(strs, mid + 1, r);
+            return commonPrefix(lcpLeft, lcpRight);
+        }
+    }
+
+    private String commonPrefix(String left, String right) {
+        int min = Math.min(left.length(), right.length());
+        for (int i = 0; i < min; i++) {
+            if (left.charAt(i) != right.charAt(i)) return left.substring(0, i);
+        }
+        return left.substring(0, min);
+    }
+}
+Time complexity : O(S), where S is the number of all characters in the array, S=m⋅n
+time complexity is O(S).
+In the best case this algorithm performs O(minLen⋅n) comparisons, where minLen is the shortest string of the array
+
+Space complexity : O(m⋅logn)
+
+There is a memory overhead since we store recursive calls in the execution stack. There are logn recursive calls, 
+each store need m space to store the result, so space complexity is O(m⋅logn)
+
+Approach 4 Binary Search
+
+class Solution {
+    public String longestCommonPrefix(String[] strs) {
+        if (strs == null || strs.length == 0) return "";
+        int minLen = Integer.MAX_VALUE;
+        for (String str : strs) minLen = Math.min(minLen, str.length());
+        int low = 1;
+        int high = minLen;
+        while (low <= high) {
+            int middle = (low + high) / 2;
+            if (isCommonPrefix(strs, middle)) low = middle + 1;
+            else high = middle - 1;
+        }
+        return strs[0].substring(0, (low + high) / 2);
+    }
+
+    private boolean isCommonPrefix(String[] strs, int len) {
+        String str1 = strs[0].substring(0, len);
+        for (int i = 1; i < strs.length; i++) if (
+            !strs[i].startsWith(str1)
+        ) return false;
+        return true;
+    }
+}
+
+Time complexity : O(S⋅logm), where S is the sum of all characters in all strings.
+
+The algorithm makes logm iterations, for each of them there are S=m⋅n comparisons, which gives in total O(S⋅logm) time complexity.
+
+Space complexity : O(1). We only used constant extra space.
+
