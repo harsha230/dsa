@@ -1,0 +1,180 @@
+The algorithm performs a vertical traversal of a binary tree using a breadth-first search (BFS) approach. 
+It begins by initializing a queue to store nodes along with their respective row and column indices. As it traverses the tree, 
+it collects node values along with their row and column information into a list. After the BFS, this list is sorted based on the column index, 
+then by row index, and finally by node value. The sorted list is then processed to group the values into separate lists based on their column indices,
+which are added to the final output. The time complexity of this approach is (O(N log N)) due to the sorting step, where \(N\) is the number of nodes in the tree. 
+The space complexity is (O(N)) for storing the node information and the output lists.
+
+class Triplet<F, S, T> {
+    public final F first;
+    public final S second;
+    public final T third;
+
+    public Triplet(F first, S second, T third) {
+        this.first = first;
+        this.second = second;
+        this.third = third;
+    }
+}
+
+class Solution {
+    List<int[]> nodeList = new ArrayList<>(); // To store (column, row, value) for each node
+
+    private void BFS(TreeNode root) {
+        Queue<Triplet<TreeNode, Integer, Integer>> queue = new ArrayDeque<>(); // Using a Triplet to store node, row, column
+        queue.offer(new Triplet<>(root, 0, 0)); // Start with root at row 0, column 0
+
+        while (!queue.isEmpty()) {
+            Triplet<TreeNode, Integer, Integer> nodeInfo = queue.poll();
+            TreeNode node = nodeInfo.first;
+            int row = nodeInfo.second;
+            int column = nodeInfo.third;
+
+            if (node != null) {
+                nodeList.add(new int[] {column, row, node.val}); // Store (column, row, value)
+                
+                // Traverse left and right children if they exist
+                if (node.left != null)
+                    queue.offer(new Triplet<>(node.left, row + 1, column - 1)); // Move left
+                if (node.right != null)
+                    queue.offer(new Triplet<>(node.right, row + 1, column + 1)); // Move right
+            }
+        }
+    }
+
+    public List<List<Integer>> verticalTraversal(TreeNode root) {
+        List<List<Integer>> output = new ArrayList<>();
+        if (root == null) {
+            return output;
+        }
+
+        // Perform BFS to gather the node info
+        BFS(root);
+
+        // Sort the nodes first by column, then by row, and finally by value
+        Collections.sort(nodeList, (a, b) -> {
+            if (a[0] != b[0]) return a[0] - b[0]; // Compare by column
+            if (a[1] != b[1]) return a[1] - b[1]; // Compare by row
+            return a[2] - b[2];                   // Compare by value
+        });
+
+        // Extract values and group them by column
+        List<Integer> currColumn = new ArrayList<>();
+        int currColumnIndex = nodeList.get(0)[0]; // Initialize to the first column index
+
+        for (int[] node : nodeList) {
+            int column = node[0];
+            int value = node[2];
+
+            if (column == currColumnIndex) {
+                currColumn.add(value); // Add value to the current column group
+            } else {
+                output.add(currColumn); // Move to the next column group
+                currColumn = new ArrayList<>();
+                currColumn.add(value);
+                currColumnIndex = column;
+            }
+        }
+        output.add(currColumn); // Add the last column group
+
+        return output;
+    }
+}
+
+Approach 2
+
+
+
+import java.util.*;
+
+// Definition for a binary tree node.
+class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+    TreeNode(int x) { val = x; }
+}
+
+class Solution {
+    // A map to store column index and the list of nodes (row, value)
+    Map<Integer, List<Pair<Integer, Integer>>> columnTable = new HashMap<>();
+    int minColumn = 0, maxColumn = 0;
+
+    // BFS traversal to populate the column table
+    private void BFS(TreeNode root) {
+        // Queue for BFS storing pairs of TreeNode and its (row, column) information
+        Queue<Pair<TreeNode, Pair<Integer, Integer>>> queue = new ArrayDeque<>();
+        queue.offer(new Pair<>(root, new Pair<>(0, 0))); // Start with root at (row 0, column 0)
+
+        while (!queue.isEmpty()) {
+            Pair<TreeNode, Pair<Integer, Integer>> current = queue.poll();
+            TreeNode currentNode = current.getKey();
+            int row = current.getValue().getKey();
+            int column = current.getValue().getValue();
+
+            if (currentNode != null) {
+                // Add the current node to the column table
+                columnTable.putIfAbsent(column, new ArrayList<>());
+                columnTable.get(column).add(new Pair<>(row, currentNode.val));
+
+                // Update min and max column indices
+                minColumn = Math.min(minColumn, column);
+                maxColumn = Math.max(maxColumn, column);
+
+                // Add left and right children to the queue with updated row and column
+                queue.offer(new Pair<>(currentNode.left, new Pair<>(row + 1, column - 1)));
+                queue.offer(new Pair<>(currentNode.right, new Pair<>(row + 1, column + 1)));
+            }
+        }
+    }
+
+    public List<List<Integer>> verticalTraversal(TreeNode root) {
+        List<List<Integer>> output = new ArrayList<>();
+        if (root == null) {
+            return output; // Return empty list if the root is null
+        }
+
+        // Step 1: Perform BFS to fill columnTable
+        BFS(root);
+
+        // Step 2: Retrieve and sort values from columnTable
+        for (int column = minColumn; column <= maxColumn; column++) {
+            // Get the list of (row, value) pairs and sort them
+            List<Pair<Integer, Integer>> columnNodes = columnTable.get(column);
+            Collections.sort(columnNodes, new Comparator<Pair<Integer, Integer>>() {
+                @Override
+                public int compare(Pair<Integer, Integer> p1, Pair<Integer, Integer> p2) {
+                    if (p1.getKey().equals(p2.getKey())) {
+                        return p1.getValue() - p2.getValue(); // Sort by value if rows are equal
+                    }
+                    return p1.getKey() - p2.getKey(); // Sort by row
+                }
+            });
+
+            // Extract the sorted values into a list
+            List<Integer> sortedColumn = new ArrayList<>();
+            for (Pair<Integer, Integer> node : columnNodes) {
+                sortedColumn.add(node.getValue());
+            }
+            output.add(sortedColumn); // Add sorted column to the output
+        }
+
+        return output; // Return the final vertical order traversal
+    }
+}
+The provided code implements a vertical order traversal of a binary tree using a breadth-first search (BFS) approach. 
+The core idea is to track the vertical position (column) of each node while traversing the tree. A `Map` is used to associate each column index with a list of pairs,
+where each pair contains the row index and the node value. The BFS begins with the root node at column 0 and row 0, 
+and it enqueues the left and right children of each node with updated row and column indices. As the traversal progresses,
+the code updates the minimum and maximum column indices to determine the range of columns that need to be processed. 
+Once the BFS completes, the code sorts the nodes within each column by their row index and value, 
+ensuring that nodes in the same row are sorted in ascending order by their values. Finally, the sorted lists of values for each column are compiled into a list of lists and returned as the result,
+providing a vertical representation of the tree. This approach efficiently organizes the tree nodes based on their vertical alignment while maintaining the necessary order for display or further processing.
+
+The time complexity of the vertical order traversal algorithm is ( O(Nlog(N/k))),
+where N is the number of nodes in the binary tree and k is the width of the tree, representing the number of columns in the result. 
+This complexity arises from two main steps: the initial breadth-first search (BFS) or depth-first search (DFS) traversal, which takes ( O(N)) time to visit all nodes, 
+and the subsequent sorting of entries in the hashmap. The sorting time for \( k \) equal-sized groups, with a total of \( N \) elements, 
+results in \( O(N \log(N/k)) \). In scenarios where the tree is completely imbalanced, the sorting operation approaches \( O(N) \), 
+making this method more efficient than previous approaches that maintained a complexity of \( O(N \log N) \). The space complexity of the algorithm is \( O(N) \), 
+reflecting the storage needed for the traversal and the hashmap, consistent with prior analyses.
