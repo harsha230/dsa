@@ -1,0 +1,125 @@
+
+This approach uses topological sorting with Kahn's algorithm to determine if all courses can be finished by detecting cycles in a directed graph. 
+It models the course prerequisites as a directed graph, where each course is a node, and a directed edge from course u to course v represents that u must be completed before v. 
+The algorithm tracks the in-degrees of each course (number of prerequisites) and uses a queue to process courses with zero in-degree (those that can be taken immediately).
+As courses are completed (processed from the queue), their dependent 
+courses have their in-degrees reduced. If all courses are processed (i.e., the number of nodes visited matches the number of courses), 
+it means there are no cycles, and it’s possible to finish all courses. If not, the graph contains a cycle, preventing the completion of all courses. 
+This solution runs in O(V + E) time, where V is the number of courses and E is the number of prerequisites.
+Time complexity: O(m+n)
+
+Initializing the adj list takes O(m) time as we go through all the edges. The indegree array take O(n) time.
+Each queue operation takes O(1) time, and a single node will be pushed once, leading to O(n) operations for n nodes. 
+We iterate over the neighbors of each node that is popped out of the queue iterating over all the edges once. Since there are total of m edges, it would take O(m) time to iterate over the edges.
+Space complexity: O(m+n)
+The adj arrays takes O(m) space. The indegree array takes O(n) space.
+The queue can have no more than n elements in the worst-case scenario. It would take up O(n) space in that case.
+
+class Solution {
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        int[] indegree = new int[numCourses];
+        List<List<Integer>> adj = new ArrayList<>(numCourses);
+
+        for (int i = 0; i < numCourses; i++) {
+            adj.add(new ArrayList<>());
+        }
+
+        for (int[] prerequisite : prerequisites) {
+            adj.get(prerequisite[1]).add(prerequisite[0]);
+            indegree[prerequisite[0]]++;
+        }
+
+        Queue<Integer> queue = new LinkedList<>();
+        // Push all the nodes with indegree zero in the queue.
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+
+        int nodesVisited = 0;
+        while (!queue.isEmpty()) {
+            int node = queue.poll();
+            nodesVisited++;
+
+            for (int neighbor : adj.get(node)) {
+                // Delete the edge "node -> neighbor".
+                indegree[neighbor]--;
+                if (indegree[neighbor] == 0) {
+                    queue.offer(neighbor);
+                }
+            }
+        }
+
+        return nodesVisited == numCourses;
+    }
+}
+
+Approach 2
+
+This approach uses Depth-First Search (DFS) to detect cycles in the directed graph of course prerequisites, which would indicate that
+it's not possible to finish all courses. The graph is represented as an adjacency list, where each course points to the courses that depend on it.
+The algorithm maintains two boolean arrays: visit to track if a node (course) has been visited, and inStack to check if a node is part of the current 
+DFS recursion stack. During DFS, if a node is encountered that is already in the recursion stack (inStack), it means a cycle has been found, 
+and the function returns true to indicate that it’s impossible to finish all courses. If the node has been visited but is not part of the current recursion stack, 
+it’s skipped. Once a node is fully processed, it is removed from the recursion stack. If no cycles are found after visiting all nodes, the function returns true,
+meaning it’s possible to finish all courses. This solution runs in O(V + E) time, where V is the number of courses and E is the number of prerequisites.
+
+class Solution {
+    public boolean dfs(int node, List<List<Integer>> adj, boolean[] visit, boolean[] inStack) {
+        // If the node is already in the stack, we have a cycle.
+        if (inStack[node]) {
+            return true;
+        }
+        if (visit[node]) {
+            return false;
+        }
+        // Mark the current node as visited and part of current recursion stack.
+        visit[node] = true;
+        inStack[node] = true;
+        for (int neighbor : adj.get(node)) {
+            if (dfs(neighbor, adj, visit, inStack)) {
+                return true;
+            }
+        }
+        // Remove the node from the stack.
+        inStack[node] = false;
+        return false;
+    }
+
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        List<List<Integer>> adj = new ArrayList<>(numCourses);
+        for (int i = 0; i < numCourses; i++) {
+            adj.add(new ArrayList<>());
+        }
+
+        for (int[] prerequisite : prerequisites) {
+            adj.get(prerequisite[1]).add(prerequisite[0]);
+        }
+
+        boolean[] visit = new boolean[numCourses];
+        boolean[] inStack = new boolean[numCourses];
+        for (int i = 0; i < numCourses; i++) {
+            if (dfs(i, adj, visit, inStack)) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+Time complexity: O(m+n)
+
+Initializing adj takes O(m) time as we go through all the edges.
+Initializing the visit and inStack arrays take O(n) time each.
+The dfs function handles each node once, which takes O(n) time in total.
+From each node, we iterate over all the outgoing edges, which further takes O(m) time to iterate over all the edges as there are a total of m edges.
+Space complexity: O(m+n)
+
+The adj arrays takes O(m) space.
+The visit and inStack arrays take O(n) space each.
+The recursion call stack used by dfs can have no more than n elements in the worst-case scenario. 
+It would take up O(n) space in that case.
+
+
+
