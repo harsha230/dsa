@@ -1,0 +1,149 @@
+
+Approach 1: Counting and Priority Queue
+This solution reorganizes a string by ensuring that no two adjacent characters are the same. 
+It first counts the frequency of each character using a hash map, then uses a max heap to always pick the character with the highest frequency.
+The heap allows the algorithm to alternate characters efficiently by temporarily storing the previous character and reinserting it into the heap once another character is used. 
+If the string cannot be reorganized (i.e., if a valid rearrangement isn't possible), the function returns an empty string. The time complexity is O(n log k), 
+where n is the length of the string and k is the number of unique characters (due to heap operations). The space complexity is O(n) for storing the frequency map, 
+result string, and heap.
+
+class Solution {
+    public String reorganizeString(String s) {
+        // Step 1: Count frequency of each character
+        Map<Character, Integer> frequencyMap = new HashMap<>();
+        for (char c : s.toCharArray()) {
+            frequencyMap.put(c, frequencyMap.getOrDefault(c, 0) + 1);
+        }
+        
+        // Step 2: Use a max heap to store characters based on frequency
+        PriorityQueue<Character> maxHeap = new PriorityQueue<>(
+            (a, b) -> frequencyMap.get(b) - frequencyMap.get(a)
+        );
+        
+        // Instead of using maxHeap.addAll, manually add each character to the heap
+        for (char c : frequencyMap.keySet()) {
+            maxHeap.offer(c);  // Add character based on frequency
+        }
+        
+        StringBuilder result = new StringBuilder();
+        Character prevChar = null;  // To store the last used character
+
+        // Step 3: Reorganize string
+        while (!maxHeap.isEmpty()) {
+            char currentChar = maxHeap.poll();
+            
+            // Append the current character
+            result.append(currentChar);
+            
+            // Reduce the frequency of the used character
+            frequencyMap.put(currentChar, frequencyMap.get(currentChar) - 1);
+            
+            // If there was a previous character, re-add it to the heap
+            if (prevChar != null && frequencyMap.get(prevChar) > 0) {
+                maxHeap.offer(prevChar);
+            }
+            
+            // Set the current character as the previous one for the next iteration
+            prevChar = currentChar;
+        }
+        
+        // Step 4: Check if the rearranged string is valid
+        if (result.length() != s.length()) {
+            return "";  // If the length doesn't match, return an empty string
+        }
+        
+        return result.toString();
+    }
+}
+
+
+Approach 2: Counting and Odd/Even
+
+import java.util.Arrays;
+
+class Solution {
+    public String reorganizeString(String s) {
+        // Step 1: Create a frequency array for lowercase English letters
+        int[] charCounts = new int[26];
+        for (char c : s.toCharArray()) {
+            charCounts[c - 'a']++;
+        }
+
+        // Step 2: Find the most frequent character
+        int maxCount = 0;
+        char mostFrequentChar = ' ';
+        int n = s.length();
+
+        for (int i = 0; i < 26; i++) {
+            if (charCounts[i] > maxCount) {
+                maxCount = charCounts[i];
+                mostFrequentChar = (char) (i + 'a');
+            }
+        }
+
+        // Step 3: Check if rearrangement is possible
+        if (maxCount > (n + 1) / 2) {
+            return "";  // Impossible to rearrange
+        }
+
+        // Step 4: Initialize result array
+        char[] result = new char[n];
+        int index = 0;
+
+        // Step 5: Place the most frequent character in even indices
+        while (charCounts[mostFrequentChar - 'a'] > 0) {
+            result[index] = mostFrequentChar;
+            index += 2;
+            charCounts[mostFrequentChar - 'a']--;
+        }
+
+        // Step 6: Place the remaining characters
+        for (int i = 0; i < 26; i++) {
+            while (charCounts[i] > 0) {
+                if (index >= n) {
+                    index = 1;  // Switch to odd indices if we run out of even ones
+                }
+                result[index] = (char) (i + 'a');
+                index += 2;
+                charCounts[i]--;
+            }
+        }
+
+        // Step 7: Return the result as a string
+        return new String(result);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+This approach to reorganizing the string involves creating a frequency array to track the count of each character, identifying the most frequent character, 
+and placing it at every alternate position in the result array. After placing the most frequent character, the remaining characters are inserted into the remaining positions,
+alternating between even and odd indices to ensure no adjacent characters are the same. The time complexity of this solution is O(n), where n is the length of the string,
+as we perform a constant-time operation for each character. The space complexity is O(n), accounting for the result array and the fixed-size frequency array of 26 characters.
+
