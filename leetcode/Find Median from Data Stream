@@ -1,0 +1,151 @@
+
+Approach 1: Simple Sorting
+
+Store the numbers in a resize-able container. Every time you need to output the median, sort the container and output the median.
+
+class MedianFinder {
+    private List<Integer> store;
+
+    /** Initialize your data structure here. */
+    public MedianFinder() {
+        store = new ArrayList<>(); // Initialize the list to store numbers
+    }
+
+    /** Adds a number into the data structure. */
+    public void addNum(int num) {
+        store.add(num); // Add the number to the list
+    }
+
+    /** Returns the median of current data stream. */
+    public double findMedian() {
+        Collections.sort(store); // Sort the list to find the median
+
+        int n = store.size();
+        if (n % 2 == 1) {
+            return store.get(n / 2); // Return the middle element for odd-sized lists
+        } else {
+            // Return the average of the two middle elements for even-sized lists
+            return (store.get(n / 2 - 1) + store.get(n / 2)) / 2.0;
+        }
+    }
+}
+
+Time complexity: O(nlogn)+O(1)≃O(nlogn).
+
+Adding a number takes amortized O(1) time for a container with an efficient resizing scheme.
+Finding the median is primarily dependent on the sorting that takes place. This takes O(nlogn) time for a standard comparative sort.
+Space complexity: O(n) linear space to hold input in a container. No extra space other than that needed (since sorting can usually be done in-place).
+
+Approach 2: Insertion Sort
+Keeping our input container always sorted (i.e. maintaining the sorted nature of the container as an invariant).
+Which algorithm allows a number to be added to a sorted list of numbers and yet keeps the entire list sorted? Well, for one, insertion sort!
+
+We assume that the current list is already sorted. When a new number comes, we have to add it to the list while maintaining the sorted 
+nature of the list. This is achieved easily by finding the correct place to insert the incoming number, using a binary search (remember, the list is always sorted). 
+Once the position is found, we need to shift all higher elements by one space to make room for the incoming number.
+
+This method would work well when the amount of insertion queries is lesser or about the same as the amount of median finding queries.
+
+    private List<Integer> store; // List to store numbers in sorted order
+
+    public MedianFinder() {
+        store = new ArrayList<>(); // Initialize the list
+    }
+
+    // Adds a number into the data structure.
+    public void addNum(int num) {
+        // If the list is empty, simply add the number
+        if (store.isEmpty()) {
+            store.add(num);
+        } else {
+            // Perform binary search to find the correct insertion point
+            int left = 0;
+            int right = store.size();
+            while (left < right) {
+                int mid = left + (right - left) / 2; // Avoid overflow
+                // Move left if the mid element is less than the number
+                if (store.get(mid) < num) {
+                    left = mid + 1;
+                } else {
+                    right = mid; // Move right to mid
+                }
+            }
+            // Insert the number at the found index
+            store.add(left, num);
+        }
+    }
+
+    // Returns the median of current data stream
+    public double findMedian() {
+        int n = store.size();
+        // If the size is odd, return the middle element
+        if (n % 2 == 1) {
+            return store.get(n / 2);
+        } else {
+            // If the size is even, return the average of the two middle elements
+            return ((double) store.get(n / 2 - 1) + store.get(n / 2)) / 2.0;
+        }
+    }
+
+
+
+Approach 3
+
+The heaps approach for finding the median in a dynamic stream of integers uses two priority queues: 
+a max-heap to maintain the lower half of the numbers and a min-heap for the upper half. When a new number is added,
+it is first pushed into the max-heap, and then the top element of the max-heap is moved to the min-heap if it is greater than the top of the min-heap. 
+This ensures that all elements in the max-heap are less than or equal to those in the min-heap. The sizes of the heaps are balanced so that they differ by
+at most one element. The median can then be calculated in constant time: if the max-heap has more elements, the median is the top of the max-heap; if both 
+heaps are of equal size, the median is the average of the tops of both heaps. The time complexity for adding a number is \(O(\log n)\) due to the insertion 
+into heaps, and the space complexity is \(O(n)\) for storing the elements in the heaps. Overall, this approach efficiently handles dynamic data, providing a 
+quick way to retrieve the median as new numbers are streamed in.
+
+
+class MedianFinder {
+    private PriorityQueue<Integer> maxHeap; // Max heap for the lower half
+    private PriorityQueue<Integer> minHeap; // Min heap for the upper half
+
+    public MedianFinder() {
+        maxHeap = new PriorityQueue<>(Collections.reverseOrder()); // Simulating max heap
+        minHeap = new PriorityQueue<>(); // Min heap
+    }
+
+    // Adds a number into the data structure.
+    public void addNum(int num) {
+        // Add to max heap (lower half)
+        maxHeap.offer(num);
+
+        // Ensure max element of maxHeap is not greater than minHeap's min element
+        if (!minHeap.isEmpty() && maxHeap.peek() > minHeap.peek()) {
+            minHeap.offer(maxHeap.poll()); // Move the top from maxHeap to minHeap
+        }
+
+        // Balance the sizes of the heaps
+        if (maxHeap.size() > minHeap.size() + 1) {
+            minHeap.offer(maxHeap.poll()); // Move top of maxHeap to minHeap
+        } else if (minHeap.size() > maxHeap.size()) {
+            maxHeap.offer(minHeap.poll()); // Move top of minHeap to maxHeap
+        }
+    }
+
+    // Returns the median of current data stream
+    public double findMedian() {
+        if (maxHeap.size() > minHeap.size()) {
+            return maxHeap.peek(); // Max heap has one more element
+        } else {
+            return (maxHeap.peek() + minHeap.peek()) / 2.0; // Both heaps are the same size
+        }
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
