@@ -1,0 +1,104 @@
+
+Approach 1
+The provided Solution class allows for randomly picking an index of a specified target number from an integer array nums, which may contain duplicates. 
+The pick method iterates through the nums array to gather all indices where the target number is found, storing these indices in a list. It then selects a
+random index from this list using a Random instance. The time complexity of the pick method is O(n), where n is the length of the nums array, since it requires a 
+complete scan to collect the indices of the target. The space complexity is O(k), where k is the number of occurrences of the target in the array, as it stores the 
+indices in a list. This approach is straightforward but may not be efficient for large arrays or frequent calls to pick with the same target.
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+class Solution {
+    private int[] nums;
+    private Random random;
+
+    public Solution(int[] nums) {
+        this.nums = nums;  // Store the input array
+        this.random = new Random();  // Initialize random number generator
+    }
+
+    public int pick(int target) {
+        List<Integer> indices = new ArrayList<>();  // List to store indices of the target
+        
+        // Collect all indices where nums[i] == target
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] == target) {
+                indices.add(i);
+            }
+        }
+        
+        // Pick a random index from the collected indices
+        return indices.get(random.nextInt(indices.size()));
+    }
+}
+
+Approach 2
+
+The Solution class efficiently picks a random index of a specified target number from an integer array nums, which may contain duplicates.
+During initialization, it constructs a HashMap that maps each unique number in nums to a list of its corresponding indices. 
+This preprocessing step allows for efficient retrieval of indices later. The pick method retrieves the list of indices for the given target and selects a 
+  random index using a Random instance. The time complexity of the pick method is O(1) on average, as it directly accesses the pre-stored list of indices
+without needing to iterate through the array. The space complexity is O(k), where k is the number of unique numbers in the array, as it stores the indices 
+of each number in the HashMap. This approach is optimal for scenarios with multiple queries for different targets, as it minimizes the time spent searching 
+  for indices after the initial setup.
+
+class Solution {
+    private HashMap<Integer, List<Integer>> indexMap; // Maps each number to its list of indices
+    private Random random; // Random number generator
+
+    public Solution(int[] nums) {
+        indexMap = new HashMap<>(); // Initialize the hashmap
+        random = new Random(); // Initialize the random number generator
+        
+        // Populate the hashmap with indices for each number
+        for (int i = 0; i < nums.length; i++) {
+            indexMap.computeIfAbsent(nums[i], k -> new ArrayList<>()).add(i);
+        }
+    }
+
+    public int pick(int target) {
+        List<Integer> indices = indexMap.get(target); // Retrieve the list of indices for the target
+        return indices.get(random.nextInt(indices.size())); // Pick a random index
+    }
+}
+Approach 3
+
+The given `Solution` class implements a randomized index picker for a specified target number in an integer array,
+utilizing reservoir sampling to ensure each occurrence has an equal probability of being selected. Upon initialization, 
+the class stores the input array and prepares a `Random` object for generating random numbers. In the `pick` method, the algorithm iterates through the array 
+while maintaining a count of the target occurrences. For each occurrence, it generates a random number from `0` to `count - 1`. If the generated number is `0`, 
+it updates the result with the current index, thus ensuring that each index is selected with a probability of \( \frac{1}{\text{count}} \). The time complexity
+of this approach is \( O(n) \), where \( n \) is the length of the array, since it requires a single pass through the array to count occurrences. 
+The space complexity is \( O(1) \) as no additional data structures are used that scale with the input size.
+
+
+
+class Solution {
+    private int[] nums; // Store the input array
+    private Random random; // Random number generator
+
+    public Solution(int[] nums) {
+        this.nums = nums; // Initialize the array
+        this.random = new Random(); // Initialize the random number generator
+    }
+
+    public int pick(int target) {
+        int count = 0; // Count of target occurrences
+        int result = -1; // Result index
+
+        // Iterate through nums to find target indices
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] == target) {
+                count++; // Increment count of occurrences
+                // Randomly choose one of the occurrences
+                if (random.nextInt(count) == 0) { // 1 in count chance
+                    result = i; // Update result with the current index
+                }
+            }
+        }
+        return result; // Return the randomly selected index
+    }
+}
+
