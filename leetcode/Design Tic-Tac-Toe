@@ -1,0 +1,119 @@
+The `TicTacToe` class implements a tic-tac-toe game on an `n x n` board, where two players take turns making moves. 
+Upon initialization, a 2D array representing the board is created, and two arrays keep track of the number of marks each player has in each row, column,
+and along the two diagonals. When a player makes a move, the function updates the corresponding row and column counts and checks if the current player has 
+achieved the winning condition by placing `n` of their marks in a horizontal, vertical, or diagonal row. The move is guaranteed to be valid, and if a player wins, 
+the function returns the player's ID; otherwise, it returns 0. This approach ensures efficient checking of winning conditions after each move, resulting in a 
+time complexity of **O(n)** per move and a space complexity of **O(n²)** for storing the board state.
+
+#Brute Force
+class TicTacToe {
+    private int[][] board;
+    private int n;
+
+    public TicTacToe(int n) {
+        this.n = n;
+        board = new int[n][n]; // Initialize an n x n board with zeros
+    }
+
+    public int move(int row, int col, int player) {
+        board[row][col] = player; // Mark the cell with the player's ID (1 or 2)
+
+        // Check the row
+        if (checkRow(row, player)) return player;
+
+        // Check the column
+        if (checkCol(col, player)) return player;
+
+        // Check the main diagonal (top-left to bottom-right)
+        if (row == col && checkMainDiagonal(player)) return player;
+
+        // Check the anti-diagonal (top-right to bottom-left)
+        if (row + col == n - 1 && checkAntiDiagonal(player)) return player;
+
+        return 0; // No winner
+    }
+
+    private boolean checkRow(int row, int player) {
+        for (int col = 0; col < n; col++) {
+            if (board[row][col] != player) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkCol(int col, int player) {
+        for (int row = 0; row < n; row++) {
+            if (board[row][col] != player) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkMainDiagonal(int player) {
+        for (int i = 0; i < n; i++) {
+            if (board[i][i] != player) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkAntiDiagonal(int player) {
+        for (int i = 0; i < n; i++) {
+            if (board[i][n - 1 - i] != player) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+Approach 2 Approach 2: Optimised Approach
+
+
+public class TicTacToe {
+    int[] rows;
+    int[] cols;
+    int diagonal;
+    int antiDiagonal;
+
+    public TicTacToe(int n) {
+        rows = new int[n];
+        cols = new int[n];
+    }
+
+    public int move(int row, int col, int player) {
+        int currentPlayer = (player == 1) ? 1 : -1;
+        // update currentPlayer in rows and cols arrays
+        rows[row] += currentPlayer;
+        cols[col] += currentPlayer;
+        // update diagonal
+        if (row == col) {
+            diagonal += currentPlayer;
+        }
+        //update anti diagonal
+        if (col == (cols.length - row - 1)) {
+            antiDiagonal += currentPlayer;
+        }
+        int n = rows.length;
+        // check if the current player wins
+        if (Math.abs(rows[row]) == n ||
+                Math.abs(cols[col]) == n ||
+                Math.abs(diagonal) == n ||
+                Math.abs(antiDiagonal) == n) {
+            return player;
+        }
+        // No one wins
+        return 0;
+    }
+}
+
+
+The provided TicTacToe class implements an optimized solution for managing a Tic-Tac-Toe game on an n x n board. 
+It uses two integer arrays, rows and cols, to track the counts of marks for each player in the respective rows and columns. 
+Additionally, it maintains two variables, diagonal and antiDiagonal, to monitor the counts for the main and anti-diagonals. 
+When a player makes a move, their mark is registered by updating the corresponding row, column, and diagonal counts based on the player's ID,
+with player 1 represented as +1 and player 2 as -1. After each move, the class checks if the current player's counts in any row, column, or diagonal
+equal n to determine if they have won. The time complexity of this approach is O(1) for each move since it involves constant-time updates and checks, 
+while the space complexity is O(n) due to the storage required for the row and column arrays, making it efficient for larger game boards.
