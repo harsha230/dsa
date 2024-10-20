@@ -1,0 +1,139 @@
+
+Approach 1
+
+class Solution {
+   public double[] medianSlidingWindow(int[] nums, int k) {
+        List<Double> medians = new ArrayList<>();
+
+        for (int i = 0; i + k <= nums.length; i++) {
+            // Create a window of size k from the nums array
+            int[] window = Arrays.copyOfRange(nums, i, i + k);
+            
+            // Sort the window
+            Arrays.sort(window);
+            
+            // Calculate the median and add it to the result list
+            if (k % 2 == 1) {
+                // Odd window size, median is the middle element
+                medians.add((double) window[k / 2]);
+            } else {
+                // Even window size, median is the average of the two middle elements
+                medians.add(((double) window[k / 2 - 1] + (double) window[k / 2]) / 2.0);
+            }
+        }
+
+        // Convert List<Double> to double[]
+        double[] result = new double[medians.size()];
+        for (int i = 0; i < medians.size(); i++) {
+            result[i] = medians.get(i);
+        }
+
+        return result;
+    }
+}
+Time complexity: O(n⋅klogk) to O(n⋅k).
+
+Copying elements into the container takes about O(k) time each. This happens about (n−k) times.
+
+Sorting for each of the (n−k) sliding window instances takes about O(klogk) time each.
+
+Bisected insertion or deletion takes about O(logk) for searching and O(k) for actual shifting of elements. This takes place about n times.
+
+Space complexity: O(k) extra linear space for the window container.
+
+
+Approach 2  Two Heaps (Lazy Removal)
+
+This solution uses two heaps (a max-heap for the lower half and a min-heap for the upper half) to efficiently maintain the median of a sliding window of size `k`.
+As the window slides, elements enter and exit, and the heaps are balanced to ensure the median can be quickly retrieved: if `k` is odd, 
+the median is the top of the max-heap; if `k` is even, it's the average of the tops of both heaps. A hash map is used for lazy deletion,
+marking elements for removal when they leave the window and discarding them only when they reach the heap tops. The time complexity is **O(n log k)**, 
+where `n` is the number of elements in `nums`, and the space complexity is **O(k)** due to the heaps and hash map.
+
+
+class Solution {
+   private PriorityQueue<Integer> lo; // Max-heap for the lower half of numbers
+    private PriorityQueue<Integer> hi; // Min-heap for the upper half of numbers
+    private Map<Integer, Integer> hash_table; // To track the count of elements to be discarded
+
+    public Solution() {
+        lo = new PriorityQueue<>(Collections.reverseOrder()); // Max heap
+        hi = new PriorityQueue<>(); // Min heap
+        hash_table = new HashMap<>();
+    }
+
+    public double[] medianSlidingWindow(int[] nums, int k) {
+        List<Double> medians = new ArrayList<>();
+        int i = 0;
+
+        // Initialize the heaps with the first 'k' elements
+        while (i < k) {
+            lo.offer(nums[i++]);
+        }
+
+        // Move the top half of the max-heap to the min-heap to balance
+        for (int j = 0; j < k / 2; j++) {
+            hi.offer(lo.poll());
+        }
+
+        // Start sliding the window
+        while (true) {
+            // Add the current median to the list
+            medians.add(k % 2 == 1 ? lo.peek() : ((double) lo.peek() + hi.peek()) / 2);
+
+            if (i >= nums.length) {
+                break; // End if all elements are processed
+            }
+
+            int out_num = nums[i - k]; // The element that is going out of the window
+            int in_num = nums[i++]; // The element that is coming into the window
+            int balance = 0; // Balance factor to track the state of heaps
+
+            // Handle outgoing number
+            if (out_num <= lo.peek()) {
+                balance--;
+            } else {
+                balance++;
+            }
+            hash_table.put(out_num, hash_table.getOrDefault(out_num, 0) + 1);
+
+            // Handle incoming number
+            if (in_num <= lo.peek()) {
+                balance++;
+                lo.offer(in_num);
+            } else {
+                balance--;
+                hi.offer(in_num);
+            }
+
+            // Rebalance the heaps if necessary
+            if (balance < 0) { // `lo` needs more elements
+                lo.offer(hi.poll());
+                balance++;
+            }
+            if (balance > 0) { // `hi` needs more elements
+                hi.offer(lo.poll());
+                balance--;
+            }
+
+            // Remove invalid numbers from the top of heaps
+            while (hash_table.getOrDefault(lo.peek(), 0) > 0) {
+                hash_table.put(lo.peek(), hash_table.get(lo.peek()) - 1);
+                lo.poll();
+            }
+            while (!hi.isEmpty() && hash_table.getOrDefault(hi.peek(), 0) > 0) {
+                hash_table.put(hi.peek(), hash_table.get(hi.peek()) - 1);
+                hi.poll();
+            }
+        }
+
+        // Convert list to an array
+        double[] result = new double[medians.size()];
+        for (int idx = 0; idx < medians.size(); idx++) {
+            result[idx] = medians.get(idx);
+        }
+        return result;
+    }
+}
+
+
