@@ -1,3 +1,101 @@
+
+This approach uses Breadth-First Search (BFS) to traverse the nested list level by level, calculating the weighted sum of integers
+by multiplying each integer by its depth. The algorithm processes all elements at a given depth before moving to the next depth, ensuring 
+each integer's contribution is correctly weighted. The time complexity is O(N), where N is the total number of nested elements, as each element is processed
+exactly once. The space complexity is also O(N), as the queue may store all the elements in the worst case (if they are all at the same depth).
+
+
+class Solution {
+    public int depthSum(List<NestedInteger> nestedList) {
+        Queue<NestedInteger> queue = new LinkedList<>();
+        queue.addAll(nestedList);
+
+        int depth = 1;
+        int total = 0;
+
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                NestedInteger nested = queue.poll();
+                if (nested.isInteger()) {
+                    total += nested.getInteger() * depth;
+                } else {
+                    queue.addAll(nested.getList());
+                }
+            }
+            depth++;
+        }
+        return total;
+    }
+}
+
+
+Approach 2 DFS
+
+This approach uses **Depth-First Search (DFS)** to traverse the nested list recursively, calculating the weighted sum of integers by 
+multiplying each integer by its depth. The algorithm starts at the outermost depth (1) and dives deeper into nested lists, incrementing the 
+depth with each recursive call. If an integer is encountered, it adds the product of the integer and its depth to the total sum. 
+The time complexity is **O(N)**, where **N** is the total number of nested elements since each element is processed exactly once. 
+The space complexity is **O(D)**, where **D** is the maximum depth of the nested list, due to the recursive stack space required for DFS traversal.
+
+//NEsted Integer Implementation
+public class NestedIntegerImpl implements NestedInteger {
+
+    // This field will either store a single integer or a nested list
+    private Integer singleInteger;
+    private List<NestedInteger> nestedList;
+
+    // Constructor initializes an empty nested list
+    public NestedIntegerImpl() {
+        this.nestedList = new ArrayList<>();
+        this.singleInteger = null; // initially, it does not hold a single integer
+    }
+
+    // Constructor initializes a single integer
+    public NestedIntegerImpl(int value) {
+        this.singleInteger = value;
+        this.nestedList = null; // not a list
+    }
+
+    // @return true if this NestedInteger holds a single integer, rather than a nested list
+    @Override
+    public boolean isInteger() {
+        return singleInteger != null;
+    }
+
+    // @return the single integer that this NestedInteger holds, if it holds a single integer
+    // Return null if this NestedInteger holds a nested list
+    @Override
+    public Integer getInteger() {
+        return this.singleInteger;
+    }
+
+    // Set this NestedInteger to hold a single integer
+    @Override
+    public void setInteger(int value) {
+        this.singleInteger = value;
+        this.nestedList = null; // clear the nested list since it's now an integer
+    }
+
+    // Set this NestedInteger to hold a nested list and adds a nested integer to it
+    @Override
+    public void add(NestedInteger ni) {
+        if (this.nestedList == null) {
+            this.nestedList = new ArrayList<>();
+            this.singleInteger = null; // no longer holds a single integer
+        }
+        this.nestedList.add(ni);
+    }
+
+    // @return the nested list that this NestedInteger holds, if it holds a nested list
+    // Return empty list if this NestedInteger holds a single integer
+    @Override
+    public List<NestedInteger> getList() {
+        if (this.nestedList == null) {
+            return new ArrayList<>(); // return empty list if it's a single integer
+        }
+        return this.nestedList;
+    }
 class Solution {
 
     public int depthSum(List<NestedInteger> nestedList) {
@@ -17,22 +115,14 @@ class Solution {
     }
 }
 
+Time complexity : O(N).
 
-class Solution {
+Similar to the DFS approach. Each nested element is put on the queue and removed from the queue exactly once.
 
-    public int depthSum(List<NestedInteger> nestedList) {
-        return dfs(nestedList, 1);
-    }
+Space complexity : O(N).
 
-    private int dfs(List<NestedInteger> list, int depth) {
-        int total = 0;
-        for (NestedInteger nested : list) {
-            if (nested.isInteger()) {
-                total += nested.getInteger() * depth;
-            } else {
-                total += dfs(nested.getList(), depth + 1);
-            }
-        }
-        return total;
-    }
-}
+The worst-case for space complexity in BFS occurs where most of the elements are in a single layer,
+for example, a flat list such as [1, 2, 3, 4, 5] as all of the elements must be put on the queue at the same time.
+Therefore, this approach also has an O(N) worst-case space complexity.
+
+
