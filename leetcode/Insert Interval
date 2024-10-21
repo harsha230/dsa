@@ -1,0 +1,107 @@
+
+Approach 1: Linear Search
+class Solution {
+    public int[][] insert(int[][] intervals, int[] newInterval) {
+        int n = intervals.length, i = 0;
+        List<int[]> res = new ArrayList<>();
+
+        // Case 1: No overlapping before merging intervals
+        while (i < n && intervals[i][1] < newInterval[0]) {
+            res.add(intervals[i]);
+            i++;
+        }
+
+        // Case 2: Overlapping and merging intervals
+        while (i < n && newInterval[1] >= intervals[i][0]) {
+            newInterval[0] = Math.min(newInterval[0], intervals[i][0]);
+            newInterval[1] = Math.max(newInterval[1], intervals[i][1]);
+            i++;
+        }
+        res.add(newInterval);
+
+        // Case 3: No overlapping after merging newInterval
+        while (i < n) {
+            res.add(intervals[i]);
+            i++;
+        }
+
+        // Convert List to array
+        return res.toArray(new int[res.size()][]);
+    }
+}
+
+Time complexity: O(N)
+
+We iterate through the intervals once, and each interval is considered and processed only once.
+
+Space complexity: O(1)
+
+We only use the result (res) array to store output, so this could be considered O(1).
+
+Approach 2: Binary Search
+
+class Solution {
+    public int[][] insert(int[][] intervals, int[] newInterval) {
+        // If the intervals vector is empty, return a vector containing the newInterval
+        if (intervals.length == 0) {
+            return new int[][] { newInterval };
+        }
+
+        int n = intervals.length;
+        int target = newInterval[0];
+        int left = 0, right = n - 1;
+
+        // Binary search to find the position to insert newInterval
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (intervals[mid][0] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+
+        // Insert newInterval at the found position
+        List<int[]> result = new ArrayList<>();
+        for (int i = 0; i < left; i++) {
+            result.add(intervals[i]);
+        }
+        result.add(newInterval);
+        for (int i = left; i < n; i++) {
+            result.add(intervals[i]);
+        }
+
+        // Merge overlapping intervals
+        List<int[]> merged = new ArrayList<>();
+        for (int[] interval : result) {
+            // If res is empty or there is no overlap, add the interval to the result
+            if (
+                merged.isEmpty() ||
+                merged.get(merged.size() - 1)[1] < interval[0]
+            ) {
+                merged.add(interval);
+                // If there is an overlap, merge the intervals by updating the end of the last interval in res
+            } else {
+                merged.get(merged.size() - 1)[1] = Math.max(
+                    merged.get(merged.size() - 1)[1],
+                    interval[1]
+                );
+            }
+        }
+
+        return merged.toArray(new int[0][]);
+    }
+}
+
+Let N be the number of intervals.
+
+Time complexity: O(N)
+
+The binary search for finding the position to insert the newInterval has a time complexity of O(logN).
+However, the insertion of the newInterval into the list may take O(N) time in the worst case, as it could involve shifting 
+elements within the list. Consequently, the overall time complexity is O(N+logN), which simplifies to O(N).
+
+Space complexity: O(N)
+
+We use the additional space to store the result (res) and perform calculations using res, so it does count towards the space complexity. 
+In the worst case, the size of res will be proportional to the number of intervals in the input list.
