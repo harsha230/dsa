@@ -1,0 +1,114 @@
+The solution employs a breadth-first search (BFS) approach to generate all valid combinations of parentheses for a given integer \( n \). 
+It starts with an empty string and enqueues it, generating all possible strings of length \( 2n \) by adding either an opening parenthesis `(` or a closing parenthesis `)`.
+This results in \( 2^{2n} \) unique combinations. Each generated string is then validated using the `isValid` function, which iterates through its characters to
+ensure it forms a valid parentheses configuration, taking \( O(n) \) time. Thus, the overall time complexity is \( O(2^{2n} \cdot n) \), while the space complexity is
+\( O(2^{2n}) \) for storing the valid combinations, making this approach inefficient for larger values of \( n \).
+
+ class Solution {
+    private boolean isValid(String pString) {
+        int leftCount = 0;
+        for (char p : pString.toCharArray()) {
+            if (p == '(') {
+                leftCount++;
+            } else {
+                leftCount--;
+            }
+
+            if (leftCount < 0) {
+                return false;
+            }
+        }
+        return leftCount == 0;
+    }
+
+    public List<String> generateParenthesis(int n) {
+        List<String> answer = new ArrayList<>();
+        Queue<String> queue = new LinkedList<>(Arrays.asList(""));
+
+        while (!queue.isEmpty()) {
+            String curString = queue.poll();
+
+            // If the length of curString is 2 * n, add it to `answer` if
+            // it is valid.
+            if (curString.length() == 2 * n) {
+                if (isValid(curString)) {
+                    answer.add(curString);
+                }
+                continue;
+            }
+            queue.offer(curString + ")");
+            queue.offer(curString + "(");
+        }
+
+        return answer;
+    }
+}
+
+
+Approach 2: Backtracking, Keep Candidate Valid
+
+class Solution {
+    public List<String> generateParenthesis(int n) {
+        List<String> answer = new ArrayList<>();
+        backtracking(answer, new StringBuilder(), 0, 0, n);
+
+        return answer;
+    }
+
+    private void backtracking(
+        List<String> answer,
+        StringBuilder curString,
+        int leftCount,
+        int rightCount,
+        int n
+    ) {
+        if (curString.length() == 2 * n) {
+            answer.add(curString.toString());
+            return;
+        }
+        if (leftCount < n) {
+            curString.append("(");
+            backtracking(answer, curString, leftCount + 1, rightCount, n);
+            curString.deleteCharAt(curString.length() - 1);
+        }
+        if (leftCount > rightCount) {
+            curString.append(")");
+            backtracking(answer, curString, leftCount, rightCount + 1, n);
+            curString.deleteCharAt(curString.length() - 1);
+        }
+    }
+}
+
+
+
+Approach 3: Divide and Conquer
+The generateParenthesis(int n) function generates all valid combinations of n pairs of parentheses using recursion. 
+It builds combinations by placing smaller valid parentheses combinations inside outer parentheses and appending others afterward. 
+The base case is when n == 0, returning an empty string. For each leftCount (representing the number of pairs inside the outermost parentheses),
+the function recursively combines results from smaller subproblems.
+
+class Solution {
+    public List<String> generateParenthesis(int n) {
+        if (n == 0) {
+            return new ArrayList(Arrays.asList(""));
+        }
+
+        List<String> answer = new ArrayList();
+        for ( int leftCount = 0;leftCount < n; ++leftCount) 
+        for (String leftString : generateParenthesis(leftCount)) 
+        for (String rightString : generateParenthesis(n - 1 - leftCount)) 
+        answer.add("(" + leftString + ")" + rightString);
+        return answer;
+    }
+}
+
+Space complexity: O(n)
+The `generateParenthesis(int n)` function generates all valid combinations of `n` pairs of parentheses using recursion. It builds combinations by placing smaller valid parentheses combinations inside outer parentheses and appending others afterward. The base case is when `n == 0`, returning an empty string. For each `leftCount` (representing the number of pairs inside the outermost parentheses), the function recursively combines results from smaller subproblems. 
+
+### Time Complexity (TC):
+The time complexity is **O(4^n / sqrt(n))**, as the Catalan number governs the number of valid parentheses combinations, which grows exponentially with `n`.
+
+### Space Complexity (SC):
+The space complexity is **O(4^n / sqrt(n))** due to the storage required for all generated combinations, and the recursive call stack adds an additional space overhead of **O(n)**.
+We don't count the answer as part of the space complexity, so the space complexity would be 
+the maximum depth of the recursion stack. At any given time, the recursive function call stack would contain at most n function calls.
