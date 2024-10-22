@@ -1,0 +1,119 @@
+Approach 1
+This solution for decoding a string that represents numbers mapped to letters (where '1' corresponds to 'A', '2' to 'B', etc.) uses 
+a **recursive approach with memoization** to avoid redundant calculations. The function `numDecodings` calls a helper function `recursiveWithMemo`,
+which explores all possible decoding options from the current index in the string. At each step, the function checks if the current substring starting 
+from the index has been processed before by looking it up in the memoization map (`memo`). If not, it computes the result by either considering the next single 
+character (if it’s a valid non-zero digit) or two characters (if they form a valid number between 10 and 26), storing intermediate results in the `memo` map to 
+avoid recomputation. The base case is when the index reaches the end of the string, where it returns 1, signifying a valid decoding. The time complexity of this approach is **O(n)**,
+where `n` is the length of the string, as each index is processed once due to memoization. The space complexity is also **O(n)**, accounting for the memoization map and recursion stack depth.
+
+class Solution {
+    Map<Integer, Integer> memo = new HashMap<>();
+
+    public int numDecodings(String s) {
+        return recursiveWithMemo(0, s);
+    }
+
+    private int recursiveWithMemo(int index, String str) {
+        // Have we already seen this substring?
+        if (memo.containsKey(index)) {
+            return memo.get(index);
+        }
+
+        // If you reach the end of the string
+        // Return 1 for success.
+        if (index == str.length()) {
+            return 1;
+        }
+
+        // If the string starts with a zero, it can't be decoded
+        if (str.charAt(index) == '0') {
+            return 0;
+        }
+
+        if (index == str.length() - 1) {
+            return 1;
+        }
+
+        int ans = recursiveWithMemo(index + 1, str);
+        if (Integer.parseInt(str.substring(index, index + 2)) <= 26) {
+            ans += recursiveWithMemo(index + 2, str);
+        }
+
+        // Save for memoization
+        memo.put(index, ans);
+
+        return ans;
+    }
+}
+
+Approach 2
+This solution employs a **dynamic programming (DP) approach** to solve the problem of decoding a string of numbers into letters,
+where each number or pair of numbers corresponds to a letter (e.g., '1' to 'A', '26' to 'Z'). The idea is to use a DP array `dp` where `dp[i]` 
+represents the number of ways to decode the string up to the `i-th` character. The base cases are initialized as `dp[0] = 1` (an empty string has
+one valid decoding) and `dp[1]` depends on whether the first character is '0' (if it's '0', there are zero ways to decode). For each subsequent character,
+two checks are performed: if the current character is not '0', we add the value of `dp[i - 1]` (single-digit decoding); if the last two characters form a valid
+two-digit number between 10 and 26, we add `dp[i - 2]` (two-digit decoding). This approach ensures that we consider all valid ways to decode the string.
+The **time complexity** is **O(n)**, where `n` is the length of the string, and the **space complexity** is also **O(n)** due to the DP array.
+
+class Solution {
+    public int numDecodings(String s) {
+        // DP array to store the subproblem results
+        int[] dp = new int[s.length() + 1];
+        dp[0] = 1;
+
+        // Ways to decode a string of size 1 is 1. Unless the string is '0'.
+        // '0' doesn't have a single digit decode.
+        dp[1] = s.charAt(0) == '0' ? 0 : 1;
+
+        for (int i = 2; i < dp.length; i++) {
+            // Check if successful single digit decode is possible.
+            if (s.charAt(i - 1) != '0') {
+                dp[i] = dp[i - 1];
+            }
+
+            // Check if successful two digit decode is possible.
+            int twoDigit = Integer.valueOf(s.substring(i - 2, i));
+            if (twoDigit >= 10 && twoDigit <= 26) {
+                dp[i] += dp[i - 2];
+            }
+        }
+
+        return dp[s.length()];
+    }
+}
+
+
+This solution for decoding a string representing numbers mapped to letters uses a **dynamic programming** approach with **constant space**. 
+The idea is to maintain two variables, `twoBack` and `oneBack`, which represent the number of ways to decode up to two and one positions back, respectively. 
+At each iteration, we check if the current character is a valid single digit (i.e., not `'0'`) and add the count from `oneBack`. Then, we check if the two-digit
+substring formed by the current and previous character is valid (between 10 and 26), and if so, add the count from `twoBack`. This process continues until 
+we reach the end of the string, and the result is stored in `oneBack`. The **time complexity** is **O(n)**, where `n` is the length of the string,
+as we process each character once. The **space complexity** is **O(1)** since only a few variables are used.
+
+class Solution {
+    public int numDecodings(String s) {
+        if (s.charAt(0) == '0') {
+            return 0;
+        }
+
+        int n = s.length();
+        int twoBack = 1;
+        int oneBack = 1;
+        for (int i = 1; i < n; i++) {
+            int current = 0;
+            if (s.charAt(i) != '0') {
+                current = oneBack;
+            }
+            int twoDigit = Integer.parseInt(s.substring(i - 1, i + 1));
+            if (twoDigit >= 10 && twoDigit <= 26) {
+                current += twoBack;
+            }
+
+            twoBack = oneBack;
+            oneBack = current;
+        }
+        return oneBack;
+    }
+}
+
