@@ -1,0 +1,84 @@
+The given Java code defines a method `canArrange`, which checks whether an array of integers can be divided into pairs such that the sum of each pair is divisible by a given integer \( k \).
+The algorithm first calculates the remainders of each element when divided by \( k \) and stores their counts in a `HashMap`. It then iterates through the array to verify two key conditions: (1) 
+if there are any elements with a remainder of 0, their count must be even, and (2) for any other remainder \( r \), the count of elements with remainder \( r \) must match the count of elements with
+remainder \( k - r \). If any condition fails, the method returns `false`; otherwise, it returns `true`. The time complexity of this algorithm is \( O(n) \), where \( n \) is the number of elements 
+in the array, due to the two passes through the array for counting and checking conditions. The space complexity is \( O(k) \) because a `HashMap` is used to store the counts of remainders, with a 
+maximum of \( k \) unique remainders possible.
+
+class Solution {
+
+    public boolean canArrange(int[] arr, int k) {
+        Map<Integer, Integer> remainderCount = new HashMap<>();
+
+        // Store the count of remainders in a map.
+        for (int i : arr) {
+            int rem = ((i % k) + k) % k;
+            remainderCount.put(rem, remainderCount.getOrDefault(rem, 0) + 1);
+        }
+
+        for (int i : arr) {
+            int rem = ((i % k) + k) % k;
+
+            // If the remainder for an element is 0, then the count
+            // of numbers that give this remainder must be even.
+            if (rem == 0) {
+                if (remainderCount.get(rem) % 2 == 1) return false;
+            }
+            // If the remainder rem and k-rem do not have the
+            // same count then pairs cannot be made.
+            else if(!Objects.equals(remainderCount.get(rem),remainderCount.get(k - rem))){
+
+                    return false;
+            }      
+        }
+        return true;
+    }
+}
+
+
+Approach 2
+
+The provided solution uses a sorting and two-pointer approach to determine if an array can be arranged into pairs whose sums are divisible by a given integer \( k \).
+First, it creates an integer array from the input and sorts it based on the remainder of each element when divided by \( k \). This is achieved using a custom comparator that 
+ensures the elements are ordered by their modulo \( k \) values. The algorithm then processes elements by pairing them starting with those that are exactly divisible by \( k \) 
+(i.e., having a remainder of zero). If such pairs cannot be formed, the function returns false. After handling the zero remainder case, the algorithm uses two pointers: one starting from
+the beginning and the other from the end of the sorted array. It checks if the sums of the elements at these pointers are divisible by \( k \), adjusting the pointers accordingly. If all pairs are valid,
+it returns true. The time complexity of this approach is \( O(n \log n) \) due to the sorting step, and the space complexity is \( O(n) \) because of the additional array used to store the elements.
+
+
+
+
+class Solution {
+
+    // Custom comparator to sort based on mod values.
+    
+
+    public boolean canArrange(int[] arr, int k) {
+        Integer[] array = new Integer[arr.length];
+        for (int i = 0; i < arr.length; ++i) {
+            array[i] = arr[i];
+        }
+         Arrays.sort(array, (a, b) -> {
+            int remA = (a % k + k) % k;
+            int remB = (b % k + k) % k;
+            return Integer.compare(remA, remB);
+        });
+       
+
+        // Assign the pairs with modulo 0 first.
+        int start = 0, end = array.length - 1;
+        while (start < end) {
+            if (array[start] % k != 0) break;
+            if (array[start + 1] % k != 0) return false;
+            start = start + 2;
+        }
+
+        // Now, pick one element from the beginning and one element from the end.
+        while (start < end) {
+            if ((array[start] + array[end]) % k != 0) return false;
+            start++;
+            end--;
+        }
+        return true;
+    }
+}
