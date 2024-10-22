@@ -1,0 +1,139 @@
+Approach 1
+
+class Solution {  // Define a class named Solution.
+
+    public boolean canJumpFromPosition(int position, int[] nums) {  // Method to determine if the last index can be reached from the current position.
+        
+        // If the current position is the last index, return true as we have reached the end.
+        if (position == nums.length - 1) {  
+            return true;  
+        }
+
+        // Calculate the furthest index that can be reached from the current position.
+        int furthestJump = Math.min(position + nums[position], nums.length - 1);  
+
+        // Iterate through all possible next positions from the current position.
+        for (  
+            int nextPosition = position + 1;  // Start from the next index.
+            nextPosition <= furthestJump;     // Continue until the furthest jump.
+            nextPosition++                      // Increment to check the next position.
+        ) {
+            // Recursively check if we can jump from the next position to the end.
+            if (canJumpFromPosition(nextPosition, nums)) {  
+                return true;  // If we can reach the end from any next position, return true.
+            }
+        }
+
+        return false;  // If none of the next positions lead to the end, return false.
+    }
+
+    public boolean canJump(int[] nums) {  // Public method to start the jumping check from the first index.
+        return canJumpFromPosition(0, nums);  // Call the helper method starting from the first index.
+    }
+}
+
+Approach 2
+
+// Enum to represent the status of each position in the array
+enum Index {
+    GOOD,     // Reaching the last index is possible from this position
+    BAD,      // Reaching the last index is impossible from this position
+    UNKNOWN,  // The status of this position has not yet been evaluated
+}
+
+public class Solution {
+    Index[] memo;  // Array to store the evaluation status of each position
+
+    // Method to determine if we can jump to the last index from the given position
+    public boolean canJumpFromPosition(int position, int[] nums) {
+        // Check if the position has already been evaluated
+        if (memo[position] != Index.UNKNOWN) {
+            return memo[position] == Index.GOOD ? true : false;  // Return true if GOOD, false if BAD
+        }
+
+        // Calculate the furthest jump possible from the current position
+        int furthestJump = Math.min(position + nums[position], nums.length - 1);
+        // Iterate through all possible next positions within the jump range
+        for (int nextPosition = position + 1; nextPosition <= furthestJump; nextPosition++) {
+            // Recursively check if we can reach the last index from the next position
+            if (canJumpFromPosition(nextPosition, nums)) {
+                memo[position] = Index.GOOD;  // Mark current position as GOOD
+                return true;  // Successfully found a path to the last index
+            }
+        }
+
+        memo[position] = Index.BAD;  // Mark current position as BAD
+        return false;  // No valid path to the last index
+    }
+
+    // Public method to initiate the jump check process
+    public boolean canJump(int[] nums) {
+        memo = new Index[nums.length];  // Initialize the memo array
+        // Set all positions in memo to UNKNOWN
+        for (int i = 0; i < memo.length; i++) {
+            memo[i] = Index.UNKNOWN;
+        }
+        memo[memo.length - 1] = Index.GOOD;  // Last position is always GOOD
+        return canJumpFromPosition(0, nums);  // Start checking from the first position
+    }
+}
+
+
+Approach 3
+The provided code defines a solution to the "Jump Game" problem, where the goal is to determine if one can jump from the first index of an array `nums` to the last index, 
+given that each element in the array represents the maximum jump length from that position. The algorithm utilizes a dynamic programming approach with a memoization array (`memo`) of type `Index` (an enum representing `GOOD`, `BAD`, and `UNKNOWN`) to keep track of the reachability status of each index. The algorithm iterates backward through the array, determining for each index if it can reach the last index by checking the furthest reachable indices. If it finds a `GOOD` index within the allowed jumps, it marks the current index as `GOOD`. Finally, the function returns whether the first index is `GOOD`. 
+
+### Time Complexity (TC) 
+The time complexity is \(O(n^2)\) in the worst case, where \(n\) is the length of the `nums` array. This occurs when each index has to check all possible jumps to find a `GOOD` index.
+
+### Space Complexity (SC)
+The space complexity is \(O(n)\) due to the memoization array used to store the reachability status for each index in the array.
+
+enum Index {
+    GOOD,
+    BAD,
+    UNKNOWN,
+}
+
+public class Solution {
+    public boolean canJump(int[] nums) {
+        Index[] memo = new Index[nums.length];
+        for (int i = 0; i < memo.length; i++) {
+            memo[i] = Index.UNKNOWN;
+        }
+        memo[memo.length - 1] = Index.GOOD;
+
+        for (int i = nums.length - 2; i >= 0; i--) {
+            int furthestJump = Math.min(i + nums[i], nums.length - 1);
+            for (int j = i + 1; j <= furthestJump; j++) {
+                if (memo[j] == Index.GOOD) {
+                    memo[i] = Index.GOOD;
+                    break;
+                }
+            }
+        }
+
+        return memo[0] == Index.GOOD;
+    }
+}
+
+Approach 4
+
+The optimized approach to solve the "Jump Game" problem involves iterating from the last index of the array towards the first, 
+maintaining a variable `leftmostGoodIndex` to track the furthest index that can be reached (i.e., the nearest GOOD position). For each position, 
+we check if it can jump to a GOOD index using the condition `currPosition + nums[currPosition] >= leftmostGoodIndex`. If this condition is met,
+we update `leftmostGoodIndex` to the current position, marking it as GOOD. This process continues until we reach the first index,
+allowing us to determine if it's possible to jump from the first index to the last. This approach significantly reduces the time complexity to 
+\(O(n)\) and the space complexity to \(O(1)\), as it eliminates the need for an additional memoization array.
+
+public class Solution {
+    public boolean canJump(int[] nums) {
+        int lastPos = nums.length - 1;
+        for (int i = nums.length - 1; i >= 0; i--) {
+            if (i + nums[i] >= lastPos) {
+                lastPos = i;
+            }
+        }
+        return lastPos == 0;
+    }
+}
