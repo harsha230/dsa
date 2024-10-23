@@ -1,0 +1,128 @@
+Approach 1
+Two coordinates are on the same diagonal if r1 - c1 == r2 - c2.
+
+This leads to the following idea: remember the value of that diagonal as groups[r-c]. If we see a mismatch, the matrix is not Toeplitz; otherwise it is.
+
+
+ class Solution {
+    public boolean isToeplitzMatrix(int[][] matrix) {
+        Map<Integer, Integer> groups = new HashMap();
+        for (int r = 0; r < matrix.length; ++r) {
+            for (int c = 0; c < matrix[0].length; ++c) {
+                if (!groups.containsKey(r-c))
+                    groups.put(r-c, matrix[r][c]);
+                else if (groups.get(r-c) != matrix[r][c])
+                    return false;
+            }
+        }
+        return true;
+    }
+}
+Time Complexity: O(M∗N). (Recall in the problem statement that M,N are the number of rows and columns in matrix.)
+
+Space Complexity: O(M+N).
+
+
+Approach 2
+Every element belongs to some diagonal, and it's previous element (if it exists) is it's top-left neighbor.
+Thus, for the square (r, c), we only need to check r == 0 OR c == 0 OR matrix[r-1][c-1] == matrix[r][c].
+class Solution {
+    public boolean isToeplitzMatrix(int[][] matrix) {
+        for (int r = 0; r < matrix.length; ++r)
+            for (int c = 0; c < matrix[0].length; ++c)
+                if (r > 0 && c > 0 && matrix[r-1][c-1] != matrix[r][c])
+                    return false;
+        return true;
+    }
+}
+
+followups
+Scenario 1: You can only load one row at a time into memory
+In this case, you need to compare each element in the current row with the corresponding element in the previous row to maintain the Toeplitz condition. The solution here involves only loading one row at a time and keeping track of the previous row in memory.
+
+Here's how you can handle this:
+
+Load one row at a time.
+Compare elements: For each element matrix[i][j], compare it with the previous row's element matrix[i-1][j-1] (if both exist).
+Keep only two rows in memory: The current row and the previous row. This ensures we maintain minimal memory usage.
+
+
+import java.io.*;
+
+public class Solution {
+    public boolean isToeplitzMatrix(File file, int m, int n) throws IOException {
+        // Create a BufferedReader to simulate loading the matrix row by row from disk
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        
+        int[] previousRow = null;  // To store the previous row
+        int[] currentRow = new int[n];  // To store the current row
+        
+        for (int i = 0; i < m; i++) {
+            // Read the current row from the file (assuming space-separated integers)
+            String[] rowStr = reader.readLine().split(" ");
+            
+            // Convert row string to an integer array
+            for (int j = 0; j < n; j++) {
+                currentRow[j] = Integer.parseInt(rowStr[j]);
+            }
+
+            // Compare the current row with the previous row
+            if (i > 0) {  // Skip the first row since there's no row before it
+                for (int j = 1; j < n; j++) {  // Start from the second element
+                    if (currentRow[j] != previousRow[j - 1]) {
+                        return false;  // Return false if any diagonal elements differ
+                    }
+                }
+            }
+
+            // Move current row to previousRow for the next iteration
+            previousRow = currentRow.clone();  // Make a copy of the current row
+        }
+        
+        return true;  // Return true if all diagonals have the same elements
+    }
+}
+
+
+Scenario 2: You can only load a partial row at a time
+
+import java.io.*;
+
+public class Solution {
+    public boolean isToeplitzMatrix(File file, int m, int n, int chunkSize) throws IOException {
+        // Create a BufferedReader to simulate loading the matrix row by row from disk
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+
+        int[] previousChunk = new int[chunkSize];
+        int[] currentChunk = new int[chunkSize];
+        
+        // Process each row in chunks
+        for (int i = 0; i < m; i++) {
+            String[] rowStr = reader.readLine().split(" ");
+            
+            // Process the row in chunks
+            for (int start = 0; start < n; start += chunkSize) {
+                int end = Math.min(start + chunkSize, n);
+                
+                // Load the current chunk
+                for (int j = start; j < end; j++) {
+                    currentChunk[j - start] = Integer.parseInt(rowStr[j]);
+                }
+
+                // Compare with the previous chunk if necessary
+                if (i > 0) {
+                    for (int j = 1; j < end - start; j++) {
+                        if (currentChunk[j] != previousChunk[j - 1]) {
+                            return false;  // Return false if any diagonal elements differ
+                        }
+                    }
+                }
+
+                // Move current chunk to previousChunk for the next chunk comparison
+                System.arraycopy(currentChunk, 0, previousChunk, 0, end - start);
+            }
+        }
+
+        return true;  // Return true if all diagonals have the same elements
+    }
+}
