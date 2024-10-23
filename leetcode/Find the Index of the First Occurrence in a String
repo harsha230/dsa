@@ -1,0 +1,262 @@
+Approach 1
+class Solution {
+    public int strStr(String haystack, String needle) {
+        int m = needle.length();
+        int n = haystack.length();
+
+        for (int windowStart = 0; windowStart <= n - m; windowStart++) {
+            for (int i = 0; i < m; i++) {
+                if (needle.charAt(i) != haystack.charAt(windowStart + i)) {
+                    break;
+                }
+                if (i == m - 1) {
+                    return windowStart;
+                }
+            }
+        }
+
+        return -1;
+    }
+}
+Time complexity: O(nm). For every window_start, we may have to iterate at most m times. 
+There are n−m+1 such window_start's. Thus, it is O((n−m+1)⋅m), which is O(nm).
+One example where the worst case occurs is when needle is "aaaaab", while haystack is all a's (Let's say, "aaaaaaaaaa"). 
+In this, we always have to take the last character of needle into comparison to conclude that the current m-substring is not equal to needle.
+Thus, we will have to iterate m times for every window_start.
+
+Space complexity: O(1).
+
+There are a handful of variables in the code (m, n, i, window_start), and all of them use constant space, hence, the space complexity is constant.
+
+
+
+Approach 2 Rabin-Karp Algorithm (Single Hash) 
+Time complexity: O(nm).
+
+In the worst case, hashNeedle might match with the hash value of all haystack substrings. 
+Hence, we then have to iterate character by character in each window. There are n−m+1 such windows of length m. Hence, the time complexity is O(nm).
+
+But in the best case, if no hash value of the haystack substring matches with hashNeedle,
+then we don't have to iterate character by character in each window. In that case, it will be O(n+m).
+Computing the hash value of haystack and needle will be O(m) and for traversing all windows, we will have O(n−m) time complexity. 
+And during traversal, we are doing constant number of operations, hence, in that case, it will be O(n−m+2m)=O(n+m).
+
+Space complexity: O(1). We are not using any extra space.
+class Solution {
+    public int hashValue(String string, int RADIX, int MOD, int m) {
+        long ans = 0;
+        long factor = 1;
+        for (int i = m - 1; i >= 0; i--) {
+            ans = (ans + (string.charAt(i) - 'a') * factor) % MOD;
+            factor = (factor * RADIX) % MOD;
+        }
+        return (int) ans;
+    }
+
+    public int strStr(String haystack, String needle) {
+        int m = needle.length();
+        int n = haystack.length();
+        if (n < m) return -1;
+
+        // CONSTANTS
+        int RADIX = 26;
+        int MOD = 1000000033;
+        long MAX_WEIGHT = 1;
+
+        for (int i = 0; i < m; i++) MAX_WEIGHT = (MAX_WEIGHT * RADIX) % MOD;
+
+        // Compute hash of needle
+        long hashNeedle = hashValue(needle, RADIX, MOD, m), hashHay = 0;
+
+        // Check for each m-substring of haystack, starting at index windowStart
+        for (int windowStart = 0; windowStart <= n - m; windowStart++) {
+            if (windowStart == 0) {
+                // Compute hash of the First Substring
+                hashHay = hashValue(haystack, RADIX, MOD, m);
+            } else {
+                // Update Hash using Previous Hash Value in O(1)
+                hashHay = (((hashHay * RADIX) % MOD) -
+                    (((int) (haystack.charAt(windowStart - 1) - 'a') *
+                            MAX_WEIGHT) %
+                        MOD) +
+                    (int) (haystack.charAt(windowStart + m - 1) - 'a') +
+                    MOD) %
+                MOD;
+            }
+            // If the hash matches, Check Character by Character.
+            // Because of Mod, spurious hits can be there.
+            if (hashNeedle == hashHay) {
+                for (int i = 0; i < m; i++) {
+                    if (needle.charAt(i) != haystack.charAt(i + windowStart)) {
+                        break;
+                    }
+                    if (i == m - 1) {
+                        return windowStart;
+                    }
+                }
+            }
+        }
+
+        return -1;
+    }
+}
+
+Approach 3 Rabin-Karp algorithm (Double Hash)
+
+
+class Solution {
+    // CONSTANTS
+    final int RADIX_1 = 26;
+    final int MOD_1 = 1000000033;
+    final int RADIX_2 = 27;
+    final int MOD_2 = 2147483647;
+
+    // Return Array of Hash Values
+    public long[] hashPair(String string, int m) {
+        long hash1 = 0, hash2 = 0;
+        long factor1 = 1, factor2 = 1;
+
+        for (int i = m - 1; i >= 0; i--) {
+            hash1 += ((int) (string.charAt(i) - 'a') * (factor1)) % MOD_1;
+            factor1 = (factor1 * RADIX_1) % MOD_1;
+            hash2 += ((int) (string.charAt(i) - 'a') * (factor2)) % MOD_2;
+            factor2 = (factor2 * RADIX_2) % MOD_2;
+        }
+
+        return new long[] { hash1 % MOD_1, hash2 % MOD_2 };
+    }
+
+    public int strStr(String haystack, String needle) {
+        int m = needle.length();
+        int n = haystack.length();
+        if (n < m) return -1;
+
+        // COMPUTING CONSTANTS
+        long MAX_WEIGHT_1 = 1;
+        long MAX_WEIGHT_2 = 1;
+        for (int i = 0; i < m; i++) {
+            MAX_WEIGHT_1 = (MAX_WEIGHT_1 * RADIX_1) % MOD_1;
+            MAX_WEIGHT_2 = (MAX_WEIGHT_2 * RADIX_2) % MOD_2;
+        }
+
+        // Compute hash pair of needle
+        long[] hashNeedle = hashPair(needle, m);
+        long[] hashHay = { 0, 0 };
+
+        // Check for each m-substring of haystack, starting at index windowStart
+        for (int windowStart = 0; windowStart <= n - m; windowStart++) {
+            if (windowStart == 0) {
+                // Compute hashPair of First Substring
+                hashHay = hashPair(haystack, m);
+            } else {
+                // Update Hash Pair using Previous Hash Value in O(1)
+                hashHay[0] = (((hashHay[0] * RADIX_1) % MOD_1) -
+                    (((int) (haystack.charAt(windowStart - 1) - 'a') *
+                            MAX_WEIGHT_1) %
+                        MOD_1) +
+                    (int) (haystack.charAt(windowStart + m - 1) - 'a') +
+                    MOD_1) %
+                MOD_1;
+                hashHay[1] = (((hashHay[1] * RADIX_2) % MOD_2) -
+                    (((int) (haystack.charAt(windowStart - 1) - 'a') *
+                            MAX_WEIGHT_2) %
+                        MOD_2) +
+                    (int) (haystack.charAt(windowStart + m - 1) - 'a') +
+                    MOD_2) %
+                MOD_2;
+            }
+
+            // If the hash matches, return immediately. Probability of Spurious Hit tends to zero.
+            if (hashNeedle[0] == hashHay[0] && hashNeedle[1] == hashHay[1]) {
+                return windowStart;
+            }
+        }
+
+        return -1;
+    }
+}
+
+Time complexity: O(n).
+
+For computing hash pairs of needle, we have to do O(m) work.
+
+For checking for a match, we have to iterate over n−m+1 times. Out of these n−m+1 operations, we have to do O(1) work for n−m times, and O(m) work for 1 time.
+
+Hence, total time complexity is O(m+(n−m)⋅1+(1)⋅m), which is O(n+m)
+
+Moreover, we are proceeding only when n≥m, thus final time complexity is O(n) only. In this case, O(m+n) has an upper bound of O(2⋅n), that's why we can ignore the m term. When n<m we are simply returning -1. Thus, only n is dominating in Time Complexity, and not m.
+
+Space complexity: O(1). We are not using any extra space.
+
+There are a handful of variables in the code, and all of them use constant space, hence, the space complexity is O(1).
+
+Approach 4: Knuth–Morris–Pratt Algorithm
+
+class Solution {
+    public int strStr(String haystack, String needle) {
+        int m = needle.length();
+        int n = haystack.length();
+
+        if (n < m) return -1;
+
+        // PREPROCESSING
+        // longest_border array
+        int[] longest_border = new int[m];
+        // Length of Longest Border for prefix before it.
+        int prev = 0;
+        // Iterating from index-1. longest_border[0] will always be 0
+        int i = 1;
+
+        while (i < m) {
+            if (needle.charAt(i) == needle.charAt(prev)) {
+                // Length of Longest Border Increased
+                prev += 1;
+                longest_border[i] = prev;
+                i += 1;
+            } else {
+                // Only empty border exist
+                if (prev == 0) {
+                    longest_border[i] = 0;
+                    i += 1;
+                }
+                // Try finding longest border for this i with reduced prev
+                else {
+                    prev = longest_border[prev - 1];
+                }
+            }
+        }
+
+        // SEARCHING
+        // Pointer for haystack
+        int haystackPointer = 0;
+        // Pointer for needle.
+        // Also indicates number of characters matched in current window.
+        int needlePointer = 0;
+
+        while (haystackPointer < n) {
+            if (
+                haystack.charAt(haystackPointer) == needle.charAt(needlePointer)
+            ) {
+                // Matched Increment Both
+                needlePointer += 1;
+                haystackPointer += 1;
+                // All characters matched
+                if (needlePointer == m) {
+                    // m characters behind last matching will be start of window
+                    return haystackPointer - m;
+                }
+            } else {
+                if (needlePointer == 0) {
+                    // Zero Matched
+                    haystackPointer += 1;
+                } else {
+                    // Optimally shift left needlePointer. Don't change haystackPointer
+                    needlePointer = longest_border[needlePointer - 1];
+                }
+            }
+        }
+
+        return -1;
+    }
+}
+
