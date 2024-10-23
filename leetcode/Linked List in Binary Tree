@@ -1,0 +1,160 @@
+
+Approach 1: DFS
+class Solution {
+
+    public boolean isSubPath(ListNode head, TreeNode root) {
+        if (root == null) return false;
+        return checkPath(root, head);
+    }
+
+    private boolean checkPath(TreeNode node, ListNode head) {
+        if (node == null) return false;
+        if (dfs(node, head)) return true; // If a matching path is found
+        // Recursively check left and right subtrees
+        return checkPath(node.left, head) || checkPath(node.right, head);
+    }
+
+    private boolean dfs(TreeNode node, ListNode head) {
+        if (head == null) return true; // All nodes in the list matched
+        if (node == null) return false; // Reached end of tree without matching all nodes
+        if (node.val != head.val) return false; // Value mismatch
+        return dfs(node.left, head.next) || dfs(node.right, head.next);
+    }
+}
+Time complexity: O(n×m)
+
+In the worst case, we might need to check every node in the tree as a potential starting point for the linked list. For each node, we might need to traverse up to m nodes in the linked list.
+
+Space complexity: O(n+m)
+
+The space complexity remains the same as Approach 1 due to the recursive nature of the solution.
+
+Approach 2: Iterative Approach
+class Solution {
+
+    public boolean isSubPath(ListNode head, TreeNode root) {
+        if (root == null) return false;
+
+        Stack<TreeNode> nodes = new Stack<>();
+        nodes.push(root);
+
+        while (!nodes.isEmpty()) {
+            TreeNode node = nodes.pop();
+
+            if (isMatch(node, head)) {
+                return true;
+            }
+
+            if (node.left != null) {
+                nodes.push(node.left);
+            }
+            if (node.right != null) {
+                nodes.push(node.right);
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isMatch(TreeNode node, ListNode lst) {
+        Stack<Map.Entry<TreeNode, ListNode>> s = new Stack<>();
+        s.push(new HashMap.SimpleEntry<>(node, lst));
+
+        while (!s.isEmpty()) {
+            Map.Entry<TreeNode, ListNode> entry = s.pop();
+            TreeNode currentNode = entry.getKey();
+            ListNode currentList = entry.getValue();
+
+            while (currentNode != null && currentList != null) {
+                if (currentNode.val != currentList.val) {
+                    break;
+                }
+                currentList = currentList.next;
+
+                if (currentList != null) {
+                    if (currentNode.left != null) {
+                        s.push(
+                            new HashMap.SimpleEntry<>(
+                                currentNode.left,
+                                currentList
+                            )
+                        );
+                    }
+                    if (currentNode.right != null) {
+                        s.push(
+                            new HashMap.SimpleEntry<>(
+                                currentNode.right,
+                                currentList
+                            )
+                        );
+                    }
+                    break;
+                }
+            }
+
+            if (currentList == null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+Time complexity: O(n×m)
+
+We potentially visit each node in the tree once. For each node, we might need to check up to m nodes in the linked list.
+
+Space complexity: O(n)
+
+The space is used by the stack, which in the worst case might contain all nodes of the tree. We don't need extra space for the linked list traversal as it's done iteratively.
+
+Approach 3: Knuth-Morris-Pratt (KMP) Algorithm
+class Solution {
+
+    public boolean isSubPath(ListNode head, TreeNode root) {
+        // Build the pattern and prefix table from the linked list
+        List<Integer> pattern = new ArrayList<>();
+        List<Integer> prefixTable = new ArrayList<>();
+        pattern.add(head.val);
+        prefixTable.add(0);
+        int patternIndex = 0;
+        head = head.next;
+
+        while (head != null) {
+            while (patternIndex > 0 && head.val != pattern.get(patternIndex)) {
+                patternIndex = prefixTable.get(patternIndex - 1);
+            }
+            patternIndex += head.val == pattern.get(patternIndex) ? 1 : 0;
+            pattern.add(head.val);
+            prefixTable.add(patternIndex);
+            head = head.next;
+        }
+
+        // Perform DFS to search for the pattern in the tree
+        return searchInTree(root, 0, pattern, prefixTable);
+    }
+
+    private boolean searchInTree(
+        TreeNode node,
+        int patternIndex,
+        List<Integer> pattern,
+        List<Integer> prefixTable
+    ) {
+        if (node == null) return false;
+
+        while (patternIndex > 0 && node.val != pattern.get(patternIndex)) {
+            patternIndex = prefixTable.get(patternIndex - 1);
+        }
+        patternIndex += node.val == pattern.get(patternIndex) ? 1 : 0;
+
+        // Check if the pattern is fully matched
+        if (patternIndex == pattern.size()) return true;
+
+        // Recursively search left and right subtrees
+        return (
+            searchInTree(node.left, patternIndex, pattern, prefixTable) ||
+            searchInTree(node.right, patternIndex, pattern, prefixTable)
+        );
+    }
+}
