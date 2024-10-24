@@ -1,0 +1,73 @@
+
+1) BFS WITH TOPOLOGICAL ORDERING
+The given code solves the problem of determining the lexicographical order of characters in an alien language based on a list of words.
+It constructs a directed graph where each character points to the characters that must come after it. 
+The solution proceeds in three steps: First, it initializes two data structures—an adjacency list to represent the graph 
+and a count map to store the in-degrees of characters. Next, it iterates through adjacent words to build the graph by comparing
+characters and recording edges between differing characters. If a word is a prefix of the next but comes later, the order is invalid,
+so the function returns `""`. Lastly, it uses Kahn's algorithm for topological sorting via a breadth-first search (BFS) to determine 
+the valid character order. If any characters remain unprocessed due to cycles or inconsistencies, the function returns an empty string.
+Otherwise, it returns the valid ordering.
+
+### Time Complexity (TC): 
+- Constructing the graph and adjacency list takes O(C), where C is the total number of characters across all words. 
+- The BFS topological sort runs in O(V + E), where V is the number of unique characters and E is the number of edges (relations between characters).
+Thus, the overall time complexity is O(C + V + E).
+
+### Space Complexity (SC):
+- We use space for the adjacency list, in-degree map, and the queue, 
+all of which take O(V + E), where V is the number of unique characters and E is the number of relations between them.
+
+public String alienOrder(String[] words) {
+    // Step 0: Create data structures and find all unique letters.
+    Map<Character, List<Character>> adjList = new HashMap<>();
+    Map<Character, Integer> counts = new HashMap<>();
+    for (String word : words) {
+        for (char c : word.toCharArray()) {
+            counts.put(c, 0);
+            adjList.put(c, new ArrayList<>());
+        }
+    }
+
+    // Step 1: Find all edges.
+    for (int i = 0; i < words.length - 1; i++) {
+        String word1 = words[i];
+        String word2 = words[i + 1];
+        // Check that word2 is not a prefix of word1.
+        if (word1.length() > word2.length() && word1.startsWith(word2)) {
+            return "";
+        }
+        // Find the first non match and insert the corresponding relation.
+        for (int j = 0; j < Math.min(word1.length(), word2.length()); j++) {
+            if (word1.charAt(j) != word2.charAt(j)) {
+                adjList.get(word1.charAt(j)).add(word2.charAt(j));
+                counts.put(word2.charAt(j), counts.get(word2.charAt(j)) + 1);
+                break;
+            }
+        }
+    }
+
+    // Step 2: Breadth-first search.
+    StringBuilder sb = new StringBuilder();
+    Queue<Character> queue = new LinkedList<>();
+    for (Character c : counts.keySet()) {
+        if (counts.get(c).equals(0)) {
+            queue.add(c);
+        }
+    }
+    while (!queue.isEmpty()) {
+        Character c = queue.remove();
+        sb.append(c);
+        for (Character next : adjList.get(c)) {
+            counts.put(next, counts.get(next) - 1);
+            if (counts.get(next).equals(0)) {
+                queue.add(next);
+            }
+        }
+    }
+
+    if (sb.length() < counts.size()) {
+        return "";
+    }
+    return sb.toString();
+}
