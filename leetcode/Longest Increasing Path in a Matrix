@@ -1,0 +1,133 @@
+
+Approach #1 (Naive DFS) [Time Limit Exceeded]
+class Solution {
+    private static final int[][] DIRECTIONS = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    
+    public int longestIncreasingPath(int[][] matrix) {
+        if (matrix == null || matrix.length == 0) return 0;
+        
+        int m = matrix.length, n = matrix[0].length;
+        int maxLength = 0;
+        
+        // Explore each cell as a starting point
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                // Perform DFS from each cell
+                int length = dfs(matrix, i, j, m, n);
+                maxLength = Math.max(maxLength, length);
+            }
+        }
+        
+        return maxLength;
+    }
+
+    private int dfs(int[][] matrix, int i, int j, int m, int n) {
+        int maxLength = 1;
+        
+        // Explore all four possible directions
+        for (int[] direction : DIRECTIONS) {
+            int x = i + direction[0], y = j + direction[1];
+            
+            // If the next cell is within bounds and has a greater value
+            if (x >= 0 && x < m && y >= 0 && y < n && matrix[x][y] > matrix[i][j]) {
+                maxLength = Math.max(maxLength, 1 + dfs(matrix, x, y, m, n));
+            }
+        }
+        
+        return maxLength;
+    }
+}
+
+Approach 2
+// DFS + Memoization Solution
+// Accepted and Recommended
+public class Solution {
+    private static final int[][] dirs = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    private int m, n;
+
+    public int longestIncreasingPath(int[][] matrix) {
+        if (matrix.length == 0) return 0;
+        m = matrix.length; n = matrix[0].length;
+        int[][] cache = new int[m][n];
+        int ans = 0;
+        for (int i = 0; i < m; ++i)
+            for (int j = 0; j < n; ++j)
+                ans = Math.max(ans, dfs(matrix, i, j, cache));
+        return ans;
+    }
+
+    private int dfs(int[][] matrix, int i, int j, int[][] cache) {
+        if (cache[i][j] != 0) return cache[i][j];
+        for (int[] d : dirs) {
+            int x = i + d[0], y = j + d[1];
+            if (0 <= x && x < m && 0 <= y && y < n && matrix[x][y] > matrix[i][j])
+                cache[i][j] = Math.max(cache[i][j], dfs(matrix, x, y, cache));
+        }
+        return ++cache[i][j];
+    }
+}
+Time complexity: O(mn). Each vertex/cell will be calculated once and only once, and each edge will be visited once and only once.
+The total time complexity is then O(V+E). V is the total number of vertices and E is the total number of edges. In our problem, O(V)=O(mn), O(E)=O(4V)=O(mn).
+
+Space complexity: O(mn). The cache dominates the space complexity.
+
+Approach 3
+
+public class Solution {
+     private static final int[][] dir = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}; // Directions for right, down, left, up
+    private int m, n;
+
+    public int longestIncreasingPath(int[][] grid) {
+        m = grid.length;
+        if (m == 0) return 0; // Handle the case of an empty grid
+        n = grid[0].length;
+
+        // Calculate outdegrees
+        int[][] outdegree = new int[m][n];
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                for (int[] d : dir) {
+                    int x = i + d[0], y = j + d[1];
+                    if (x >= 0 && x < m && y >= 0 && y < n && grid[i][j] < grid[x][y]) {
+                        outdegree[i][j]++;
+                    }
+                }
+            }
+        }
+
+        // Find leaves with zero outdegree as the initial level
+        List<int[]> leaves = new ArrayList<>();
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (outdegree[i][j] == 0) {
+                    leaves.add(new int[]{i, j});
+                }
+            }
+        }
+
+        // Remove leaves level by level in topological order
+        int height = 0;
+        while (!leaves.isEmpty()) {
+            height++;
+            List<int[]> newLeaves = new ArrayList<>();
+            for (int[] node : leaves) {
+                for (int[] d : dir) {
+                    int x = node[0] + d[0], y = node[1] + d[1];
+        if (x >= 0 && x < m && y >= 0 && y < n && grid[node[0]][node[1]] > grid[x][y]) {
+                        if (--outdegree[x][y] == 0) {
+                            newLeaves.add(new int[]{x, y});
+                        }
+                    }
+                }
+            }
+            leaves = newLeaves; // Move to the next level of leaves
+        }
+        return height;
+    }
+}
+Time complexity : O(mn). The the topological sort is O(V+E)=O(mn).
+Here, V is the total number of vertices and E is the total number of edges. In our problem, O(V)=O(mn), O(E)=O(4V)=O(mn).
+
+Space complexity : O(mn). We need to store the out degrees and each level of leaves.
+
+
