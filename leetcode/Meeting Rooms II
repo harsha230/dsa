@@ -58,6 +58,12 @@ Hence, the space complexity is O(N).
 
 
 Approach 2: Chronological Ordering
+The approach to solve the "minimum meeting rooms" problem is based on sorting the start and end times of the meeting intervals. First, two arrays 
+are created to store the start and end times separately. Both arrays are then sorted. Using two pointers, we iterate through the start times and end times, incrementing the number of rooms required when a new meeting starts before the previous one ends. If a meeting ends, the number of used rooms decreases, and the end pointer moves forward. The time complexity of this approach is 
+O(nlogn)
+O(nlogn) because of the sorting of the start and end times, where 
+n is the number of intervals. The space complexity is O(n)
+O(n) due to the additional space required for the start and end arrays.
 
 class Solution {
     public int minMeetingRooms(int[][] intervals) {
