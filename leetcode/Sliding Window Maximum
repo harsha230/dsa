@@ -1,0 +1,75 @@
+The brute force approach for solving the sliding window maximum problem is to iterate through the array and,
+for each possible window of size k, find the maximum element. Specifically, for each starting index i of the window 
+(from 0 to n-k), loop through the k elements in the window (from i to i+k-1), track the maximum value, and append 
+it to the result list. This method checks all k elements in each window, leading to a time complexity of O(n * k),
+where n is the number of elements in the array and k is the size of the window. While simple to implement, this approach
+is inefficient for large inputs due to redundant computations for overlapping windows. The space complexity is O(1) 
+(excluding the output list).
+public class SlidingWindowMax {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        if (nums == null || nums.length == 0) {
+            return new int[0];
+        }
+
+        int n = nums.length;
+        int[] result = new int[n - k + 1];
+        
+        // Loop through each possible starting position of the window
+        for (int i = 0; i <= n - k; i++) {
+            int max = nums[i];
+            // Check the maximum in the current window of size k
+            for (int j = i; j < i + k; j++) {
+                if (nums[j] > max) {
+                    max = nums[j];
+                }
+            }
+            result[i] = max;
+        }
+
+        return result;
+    }
+}
+
+Approach 2
+This code efficiently solves the sliding window maximum problem using a **monotonic deque**. 
+It maintains a deque that stores indices of the array elements in such a way that the elements in the deque are 
+always in descending order. As the window slides from left to right, the deque only keeps the indices of elements that are useful
+for determining the maximum in the current window. For each new element, it removes elements from the back of the deque if they are smaller 
+than or equal to the current element, ensuring the deque's monotonic property. It also removes the front element if it’s out of the window’s bounds. 
+The maximum of each window is the element at the front of the deque, and the result is collected in a list and returned as an array. 
+
+### Time Complexity:
+- **O(n)**: Each element is added and removed from the deque at most once, so the overall time complexity is linear.
+
+### Space Complexity:
+- **O(k)**: The deque stores at most `k` elements, which corresponds to the size of the sliding window. Additionally,
+space is required for the result list, but it doesn't exceed O(n).
+
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        Deque<Integer> dq = new ArrayDeque<>();
+        List<Integer> res = new ArrayList<>();
+
+        for (int i = 0; i < k; i++) {
+            while (!dq.isEmpty() && nums[i] >= nums[dq.peekLast()]) {
+                dq.pollLast();
+            }
+            dq.offerLast(i);
+        }
+        res.add(nums[dq.peekFirst()]);
+
+        for (int i = k; i < nums.length; i++) {
+            if (dq.peekFirst() == i - k) {
+                dq.pollFirst();
+            }
+            while (!dq.isEmpty() && nums[i] >= nums[dq.peekLast()]) {
+                dq.pollLast();
+            }
+
+            dq.offerLast(i);
+            res.add(nums[dq.peekFirst()]);
+        }
+        // Return the result as an array.
+        return res.stream().mapToInt(i->i).toArray();
+    }
+}
