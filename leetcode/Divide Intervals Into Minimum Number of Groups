@@ -1,0 +1,134 @@
+
+Approach 1
+
+The approach used in this solution effectively transforms the problem of counting overlapping intervals into a series of events, utilizing a sweep line technique.
+Each interval is represented as two events: a start event at the interval's start time (incrementing the count of active intervals) and an end event at the interval's 
+end time plus one (decrementing the count). These events are then sorted primarily by time, 
+and in the case of ties, start events are prioritized over end events to ensure correct counting of active intervals at any point.
+By sweeping through the sorted events and maintaining a count of active intervals, the algorithm keeps track of the maximum number of 
+overlapping intervals encountered at any time, which directly correlates to the minimum number of groups needed. The time complexity of this approach is
+\(O(N \log N)\) due to the sorting step, where \(N\) is the number of intervals, while the space complexity is \(O(N)\) for storing the event list.
+
+class Solution {
+
+    public int minGroups(int[][] intervals) {
+        // Convert the intervals to two events
+        // start as {start, 1} and end as {end + 1, -1}
+        List<int[]> events = new ArrayList<>();
+
+        for (int[] interval : intervals) {
+            events.add(new int[] { interval[0], 1 }); // Start event
+            events.add(new int[] { interval[1] + 1, -1 }); // End event (interval[1] + 1)
+        }
+
+        // Sort the events first by time, and then by type (1 for start, -1 for end).
+        Collections.sort(events, (a, b) -> {
+            if (a[0] == b[0]) {
+                return Integer.compare(a[1], b[1]); // Sort by type (1 before -1)
+            } else {
+                return Integer.compare(a[0], b[0]); // Sort by time
+            }
+        });
+
+        int concurrentIntervals = 0;
+        int maxConcurrentIntervals = 0;
+
+        // Sweep through the events
+        for (int[] event : events) {
+            concurrentIntervals += event[1]; // Track currently active intervals
+            maxConcurrentIntervals = Math.max(
+                maxConcurrentIntervals,
+                concurrentIntervals
+            ); // Update max
+        }
+
+        return maxConcurrentIntervals;
+    }
+}
+
+Approach 2
+
+This solution employs a `TreeMap` to efficiently track the starting and ending points of intervals,
+enabling the calculation of the minimum number of non-overlapping groups required. For each interval,
+it marks the start point by incrementing the count and marks the end point by decrementing the count right after the interval ends 
+(i.e., `end + 1`). The `TreeMap` automatically sorts the keys in ascending order, allowing for a straightforward traversal to 
+maintain a running total of active intervals. As it iterates through the entries, it updates the count of currently active intervals
+and simultaneously tracks the maximum number of concurrent intervals, which directly corresponds to the minimum number of groups needed.
+The time complexity of this approach is \(O(N \log N)\), where \(N\) is the number of intervals (due to the `TreeMap` operations),
+and the space complexity is \(O(N)\) for storing the interval counts in the map.
+
+class Solution {
+
+    public int minGroups(int[][] intervals) {
+        // Use a TreeMap to store the points and their counts
+        TreeMap<Integer, Integer> pointToCount = new TreeMap<>();
+
+        // Mark the starting and ending points in the TreeMap
+        for (int[] interval : intervals) {
+            pointToCount.put(
+                interval[0],
+                pointToCount.getOrDefault(interval[0], 0) + 1
+            );
+            pointToCount.put(
+                interval[1] + 1,
+                pointToCount.getOrDefault(interval[1] + 1, 0) - 1
+            );
+        }
+
+        int concurrentIntervals = 0;
+        int maxConcurrentIntervals = 0;
+
+        // Iterate over the entries of the TreeMap in ascending order of keys
+        for (Map.Entry<Integer, Integer> entry : pointToCount.entrySet()) {
+            concurrentIntervals += entry.getValue(); // Update currently active intervals
+            maxConcurrentIntervals = Math.max(
+                maxConcurrentIntervals,
+                concurrentIntervals
+            ); // Update max intervals
+        }
+
+        return maxConcurrentIntervals;
+    }
+}
+
+Approach 3
+This solution utilizes a counting technique based on a difference array to determine the minimum number of groups required to separate overlapping intervals.
+First, it identifies the minimum and maximum values across all intervals to define the range for the counting array. An auxiliary array, `pointToCount`,
+is then initialized to track the start and end of each interval, where it increments the count at the start of each interval and decrements right after the end.
+By iterating through the range from the minimum to the maximum value, the algorithm maintains a running total of active intervals using a prefix sum approach,
+which allows it to identify the maximum number of concurrent intervals at any point. This maximum value directly indicates the minimum number of groups needed. 
+The time complexity of this approach is \(O(N + M)\), where \(N\) is the number of intervals and \(M\) is the size of the range (from `rangeStart` to `rangeEnd`).
+The space complexity is \(O(M)\) for the counting array.
+
+class Solution {
+
+    public int minGroups(int[][] intervals) {
+        // Find the minimum and maximum value in the intervals
+        int rangeStart = Integer.MAX_VALUE;
+        int rangeEnd = Integer.MIN_VALUE;
+        for (int[] interval : intervals) {
+            rangeStart = Math.min(rangeStart, interval[0]);
+            rangeEnd = Math.max(rangeEnd, interval[1]);
+        }
+
+        // Initialize the array with all zeroes
+        int[] pointToCount = new int[rangeEnd + 2];
+        for (int[] interval : intervals) {
+            pointToCount[interval[0]]++; // Increment at the start of the interval
+            pointToCount[interval[1] + 1]--; // Decrement right after the end of the interval
+        }
+
+        int concurrentIntervals = 0;
+        int maxConcurrentIntervals = 0;
+        for (int i = rangeStart; i <= rangeEnd; i++) {
+            // Update currently active intervals
+            concurrentIntervals += pointToCount[i];
+            maxConcurrentIntervals = Math.max(
+                maxConcurrentIntervals,
+                concurrentIntervals
+            );
+        }
+
+        return maxConcurrentIntervals;
+    }
+}
