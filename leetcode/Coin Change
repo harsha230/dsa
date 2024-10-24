@@ -1,0 +1,131 @@
+Approach 1 Recursion
+
+public class Solution {
+    public int coinChange(int[] coins, int amount) {
+        // Brute force approach to find the minimum coins required
+        int result = coinChangeHelper(coins, amount);
+        return result == Integer.MAX_VALUE ? -1 : result;
+    }
+
+    private int coinChangeHelper(int[] coins, int amount) {
+        // Base case: If the amount is 0, no coins are needed
+        if (amount == 0) {
+            return 0;
+        }
+
+        // If the amount is negative, return a large number indicating an invalid path
+        if (amount < 0) {
+            return Integer.MAX_VALUE;
+        }
+
+        // Initialize the minimum number of coins as a large number
+        int minCoins = Integer.MAX_VALUE;
+
+        // Try every coin and find the minimum
+        for (int coin : coins) {
+            int res = coinChangeHelper(coins, amount - coin);
+            if (res != Integer.MAX_VALUE) {
+                minCoins = Math.min(minCoins, res + 1);
+            }
+        }
+
+        return minCoins;
+    }
+}
+The time complexity of this brute force approach is O(coins^amount) because we recursively check every combination of coins for the given amount.
+For each amount, we consider every coin and subtract it, leading to an exponential number of recursive calls.
+
+Space Complexity:
+The space complexity is O(amount) due to the depth of the recursive call stack.
+
+
+Approach 2 Recursion with memo
+
+public class Solution {
+    public int coinChange(int[] coins, int amount) {
+        // Create a memoization array and initialize it with -1 (uncomputed)
+        int[] memo = new int[amount + 1];
+        Arrays.fill(memo, -1);
+        
+        // Call the recursive helper function
+        int result = coinChangeHelper(coins, amount, memo);
+        
+        // If the result is a large number (impossible), return -1
+        return result == Integer.MAX_VALUE ? -1 : result;
+    }
+    
+    private int coinChangeHelper(int[] coins, int amount, int[] memo) {
+        // Base case: If amount is 0, no coins are needed
+        if (amount == 0) {
+            return 0;
+        }
+        
+        // If amount is negative, return a large number indicating invalid path
+        if (amount < 0) {
+            return Integer.MAX_VALUE;
+        }
+        
+        // If the result is already in memo, return it
+        if (memo[amount] != -1) {
+            return memo[amount];
+        }
+        
+        // Initialize the minimum number of coins as a large number
+        int minCoins = Integer.MAX_VALUE;
+        
+        // Try every coin and calculate the minimum number of coins recursively
+        for (int coin : coins) {
+            int result = coinChangeHelper(coins, amount - coin, memo);
+            if (result != Integer.MAX_VALUE) {
+                minCoins = Math.min(minCoins, result + 1);
+            }
+        }
+        
+        // Store the result in memo and return it
+        memo[amount] = minCoins;
+        return minCoins;
+    }
+}
+
+O(n * amount) where n is the number of coins. Each subproblem (for every amount) is solved once, and each recursive call iterates over all n coins.
+Space Complexity:
+O(amount) due to the recursion stack and the memoization array memo that stores results for each amount from 0 to amount.
+
+
+
+
+APproach 3
+
+This approach uses Dynamic Programming (DP) to solve the coin change problem. The idea is to build a dp array where dp[i] 
+represents the minimum number of coins needed to make amount i. The array is initialized with a large value (amount + 1) to 
+represent impossible combinations. We start with the base case where dp[0] = 0 since no coins are needed to make amount 0. 
+Then, for each amount from 1 to amount, we iterate through the coins and update the dp[i] value by checking if including a 
+coin results in a smaller count of coins. If dp[amount] remains the large value, it's impossible to make that amount, so we return -1; otherwise, return dp[amount].
+
+Time Complexity: O(n * amount), where n is the number of coins and amount is the target value, as we loop through each amount 
+and for each amount, we loop through all coins.
+
+Space Complexity: O(amount), because we use a single array dp of size amount + 1.
+
+
+public class Solution {
+    public int coinChange(int[] coins, int amount) {
+        // Initialize the dp array, with amount+1 because it's not possible to make amount with more than 'amount' coins
+        int[] dp = new int[amount + 1];
+        Arrays.fill(dp, amount + 1); // Fill the array with a large value (amount + 1)
+        dp[0] = 0; // Base case: 0 coins are needed to make the amount 0
+
+        // Loop through all amounts from 1 to 'amount'
+        for (int i = 1; i <= amount; i++) {
+            // Loop through each coin
+            for (int coin : coins) {
+                if (i - coin >= 0) { // If the coin is less than or equal to the current amount
+                    dp[i] = Math.min(dp[i], dp[i - coin] + 1); // Update dp[i] if using this coin gives a better solution
+                }
+            }
+        }
+
+        // If the dp[amount] is still the large value, it means we couldn't form the amount
+        return dp[amount] > amount ? -1 : dp[amount];
+    }
+}
