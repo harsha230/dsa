@@ -1,0 +1,138 @@
+Approach 1
+
+The provided solution employs a backtracking approach to restore valid IP addresses from a given string of digits. 
+The `helper` function recursively attempts to place dots in the string to create segments representing the four integers of
+an IP address, ensuring that each segment adheres to the valid conditions (i.e., each integer is between 0 and 255 and does 
+not have leading zeros). The function utilizes two main checks: first, it verifies if the remaining substring can potentially form valid segments,
+and second, it checks the validity of segments as they are formed. The time complexity of this approach is \(O(M^N \cdot N)\), where \(M\) is the
+maximum digit length of each segment (up to 3), and \(N\) is the total number of segments (4), leading to a practical complexity of \(O(1)\) for the 
+specific problem constraints. The space complexity is \(O(M \cdot N)\) due to storing intermediate segment lengths and the resulting valid IP address 
+strings, which also simplifies to \(O(1)\) under the same constraints.
+
+class Solution {
+    private boolean valid(String s, int start, int length) {
+        return (
+            length == 1 ||
+            (s.charAt(start) != '0' &&
+                (length < 3 ||
+                    s.substring(start, start + length).compareTo("255") <= 0))
+        );
+    }
+
+    private void helper(
+        String s,
+        int startIndex,
+        List<Integer> dots,
+        List<String> ans
+    ) {
+        final int remainingLength = s.length() - startIndex;
+        final int remainingNumberOfIntegers = 4 - dots.size();
+        if (
+            remainingLength > remainingNumberOfIntegers * 3 ||
+            remainingLength < remainingNumberOfIntegers
+        ) {
+            return;
+        }
+        if (dots.size() == 3) {
+            if (valid(s, startIndex, remainingLength)) {
+                StringBuilder sb = new StringBuilder();
+                int last = 0;
+                for (Integer dot : dots) {
+                    sb.append(s.substring(last, last + dot));
+                    last += dot;
+                    sb.append('.');
+                }
+                sb.append(s.substring(startIndex));
+                ans.add(sb.toString());
+            }
+            return;
+        }
+        for (
+            int curPos = 1;
+            curPos <= 3 && curPos <= remainingLength;
+            ++curPos
+        ) {
+            // Append a dot at the current position.
+            dots.add(curPos);
+            // Try making all combinations with the remaining string.
+            if (valid(s, startIndex, curPos)) {
+                helper(s, startIndex + curPos, dots, ans);
+            }
+            // Backtrack, i.e. remove the dot to try placing it at the next position.
+            dots.remove(dots.size() - 1);
+        }
+    }
+
+    public List<String> restoreIpAddresses(String s) {
+        List<String> ans = new ArrayList<>();
+        helper(s, 0, new ArrayList<>(), ans);
+        return ans;
+    }
+}
+
+
+Approach 2
+This solution generates all possible valid IP addresses by iterating over possible lengths for each of the first three segments (`len1`, `len2`, and `len3`) 
+and setting the fourth as the remaining string length. For each potential length combination, it validates that each segment meets IP address requirements: it 
+must not start with `0` (unless it’s a single digit) and must not exceed `255`. If all four segments are valid, they’re joined with dots and added to the answer list. 
+This solution splits the input string into \(N\) integers, each up to \(M\) digits, aiming to form valid IP addresses. The time complexity is \(O(M^N \cdot N)\):
+we use \(N-1\) nested loops to set segment lengths, each iterating up to \(M\) times, resulting in \(M^{N-1}\) combinations. For each, we check the validity of the
+\(N\) substrings formed, taking \(O(M \cdot N)\) time per configuration. Thus, the total time complexity is \(O(M^{N-1} \cdot M \cdot N) = O(M^N \cdot N)\).
+Given \(M = 3\) and \(N = 4\) for IP addresses, this simplifies to \(O(1)\), as the range of iterations is limited. The space complexity is also \(O(M \cdot N)\):
+we store the segment lengths in \(O(N)\) space and require \(O(M \cdot N)\) temporary space to build each IP address, making both time and space complexities effectively \(O(1)\) for this problem.
+class Solution {
+    private boolean isValid(String s, int start, int length) {
+        return (
+            length == 1 ||
+            (s.charAt(start) != '0' &&
+                (length < 3 ||
+                    s.substring(start, start + length).compareTo("255") <= 0))
+        );
+    }
+
+    public List<String> restoreIpAddresses(String s) {
+        List<String> ans = new ArrayList<>();
+        for (int len1 = Math.max(1, s.length() - 9);len1 <= 3 && len1 <= s.length() - 3;
+            ++len1
+        ) {
+            if (!isValid(s, 0, len1)) {
+                continue;
+            }
+
+            for (
+                int len2 = Math.max(1, s.length() - len1 - 6);
+                len2 <= 3 && len2 <= s.length() - len1 - 2;
+                ++len2
+            ) {
+                if (!isValid(s, len1, len2)) {
+                    continue;
+                }
+                for (
+                    int len3 = Math.max(1, s.length() - len1 - len2 - 3);
+                    len3 <= 3 && len3 <= s.length() - len1 - len2 - 1;
+                    ++len3
+                ) {
+                    if (
+                        isValid(s, len1 + len2, len3) &&
+                        isValid(
+                            s,
+                            len1 + len2 + len3,
+                            s.length() - len1 - len2 - len3
+                        )
+                    ) {
+                        ans.add(
+                            String.join(
+                                ".",
+                                s.substring(0, len1),
+                                s.substring(len1, len1 + len2),
+                                s.substring(len1 + len2, len1 + len2 + len3),
+                                s.substring(len1 + len2 + len3)
+                            )
+                        );
+                    }
+                }
+            }
+        }
+        return ans;
+    }
+}
