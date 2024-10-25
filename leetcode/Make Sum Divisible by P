@@ -1,0 +1,64 @@
+
+Approach 1: Brute Force (Time Limit Exceeded)
+
+The brute force approach for this problem involves iterating through all possible subarrays of the given array `nums` and calculating their sums to
+determine which subarray can be removed to make the sum of the remaining elements divisible by `p`. To implement this, we first compute the total sum
+of the array. Next, we generate all subarrays by using nested loops: the outer loop defines the starting index of the subarray, and the inner loop defines
+the ending index. For each subarray, we calculate its sum and subtract it from the total sum to check if the new sum is divisible by `p`. We keep track of
+the minimum length of the subarray that meets this condition. If no valid subarray is found that allows the remaining sum to be divisible by `p`, we return -1.
+The time complexity of this brute force method is **O(n^3)** due to the need to check all subarrays, and the space complexity is **O(1)** since no additional
+data structures are needed beyond a few variables for tracking sums and indices.
+
+Approach 2: Prefix Sum Modulo
+
+The provided solution employs an efficient algorithm to find the length of the smallest subarray that, when removed, makes 
+the sum of the remaining elements divisible by \( p \). First, it calculates the total sum of the array and determines the target remainder 
+when this sum is divided by \( p \). If the target remainder is zero, the entire array is already divisible by \( p \), and the function returns 0.
+To find the smallest removable subarray, the algorithm utilizes a hash map to track the earliest occurrences of each prefix sum modulo \( p \).
+As it iterates through the array, it calculates the current prefix sum and determines the "needed" remainder that would allow the remaining 
+sum to be divisible by \( p \). If this needed remainder has been encountered before, the algorithm computes the length of the subarray that
+can be removed and updates the minimum length accordingly. The overall time complexity of this approach is \( O(n) \), where \( n \) is the
+length of the input array, due to the single pass through the array, while the space complexity is also \( O(n) \) for storing the prefix sums in the hash map.
+
+class Solution {
+
+    public int minSubarray(int[] nums, int p) {
+        int n = nums.length;
+        int totalSum = 0;
+
+        // Step 1: Calculate total sum and target remainder
+        for (int num : nums) {
+            totalSum = (totalSum + num) % p;
+        }
+
+        int target = totalSum % p;
+        if (target == 0) {
+            return 0; // The array is already divisible by p
+        }
+
+        // Step 2: Use a hash map to track prefix sum mod p
+        HashMap<Integer, Integer> modMap = new HashMap<>();
+        modMap.put(0, -1); // To handle the case where the whole prefix is the answer
+        int currentSum = 0;
+        int minLen = n;
+
+        // Step 3: Iterate over the array
+        for (int i = 0; i < n; ++i) {
+            currentSum = (currentSum + nums[i]) % p;
+
+            // Calculate what we need to remove
+            int needed = (currentSum - target + p) % p;
+
+            // If we have seen the needed remainder, we can consider this subarray
+            if (modMap.containsKey(needed)) {
+                minLen = Math.min(minLen, i - modMap.get(needed));
+            }
+
+            // Store the current remainder and index
+            modMap.put(currentSum, i);
+        }
+
+        // Step 4: Return result
+        return minLen == n ? -1 : minLen;
+    }
+}
