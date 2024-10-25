@@ -1,0 +1,92 @@
+
+
+Approach 1
+
+The provided code defines a method to flatten a binary tree into a linked list in place using a recursive approach. 
+The `flattenTree` function takes a `TreeNode` as input and processes it in a post-order fashion, recursively flattening 
+the left and right subtrees. For each node, it adjusts the pointers such that the left subtree is attached to the right, 
+effectively removing all left child references. The function returns the rightmost node after the connections are adjusted.
+The time complexity of this approach is \(O(n)\), where \(n\) is the number of nodes in the tree, as each node is visited once.
+The space complexity is \(O(h)\), where \(h\) is the height of the tree, due to the recursion stack used for the function calls,
+which can be as deep as the height of the tree in the case of a skewed tree.
+
+private TreeNode flattenTree(TreeNode node) {
+        // Handle the null scenario
+        if (node == null) {
+            return null;
+        }
+
+        // For a leaf node, we simply return the
+        // node as is.
+        if (node.left == null && node.right == null) {
+            return node;
+        }
+
+        //Recursively flatten the left subtree
+        TreeNode leftTail = this.flattenTree(node.left);
+
+        // Recursively flatten the right subtree
+        TreeNode rightTail = this.flattenTree(node.right);
+
+        // If there was a left subtree, we shuffle the connections
+        // around so that there is nothing on the left side
+        // anymore.
+        if (leftTail != null) {
+            leftTail.right = node.right;
+            node.right = node.left;
+            node.left = null;
+        }
+
+        // We need to return the "rightmost" node after we are
+        // done wiring the new connections.
+        return rightTail == null ? leftTail : rightTail;
+    }
+
+    public void flatten(TreeNode root) {
+        this.flattenTree(root);
+    }
+
+
+Approach 2
+
+The provided method flatten transforms a binary tree into a flattened linked list in-place, where all nodes are connected through their right pointers, 
+and the left pointers are set to null. The algorithm iterates through each node of the tree using a while loop.
+If a node has a left child, it identifies the rightmost node of the left subtree. It then rewires the connections by 
+setting the right pointer of the rightmost node to the current node's right child, moves the left subtree to the right, 
+and nullifies the left pointer. This process continues until all nodes are processed. The time complexity of this approach is O(n)
+O(n), where n is the number of nodes in the tree, as each node is visited once. The space complexity is O(1)
+O(1), as it uses a constant amount of extra space, operating directly on the tree without recursion or additional data structures.
+
+
+class Solution {
+    public void flatten(TreeNode root) {
+        // Handle the null scenario
+        if (root == null) {
+            return;
+        }
+
+        TreeNode node = root;
+
+        while (node != null) {
+            // If the node has a left child
+            if (node.left != null) {
+                // Find the rightmost node
+                TreeNode rightmost = node.left;
+                while (rightmost.right != null) {
+                    rightmost = rightmost.right;
+                }
+
+                // rewire the connections
+                rightmost.right = node.right;
+                node.right = node.left;
+                node.left = null;
+            }
+
+            // move on to the right side of the tree
+            node = node.right;
+        }
+    }
+}
+
+
+
