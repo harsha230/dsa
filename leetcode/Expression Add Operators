@@ -1,0 +1,46 @@
+Approach 1
+
+The provided `addOperators` class implements a backtracking algorithm to generate all possible expressions by inserting the operators `+`, `-`, and `*` between 
+the digits of the input string `num`, such that the resultant expression evaluates to a given `target`. The algorithm employs a recursive `backtrack` method,
+which explores each segment of digits, checking combinations of operators while managing the current value of the expression and the last operand for multiplication.
+The complexity of this approach arises from the exponential growth of possible expressions, leading to a time complexity of **O(3^(n-1))**, where `n` is the number 
+of digits in `num`. The space complexity is **O(n)** due to the maximum depth of the recursion stack, along with additional space used to store the resulting valid
+expressions in the list. This makes the solution efficient for moderate-sized inputs while still potentially computationally intensive for larger values.
+class Solution {
+     public List<String> addOperators(String num, int target) {
+        List<String> result = new ArrayList<>();
+        backtrack(result, num, target, 0, 0, 0, "");
+        return result;
+    }
+
+    private void backtrack(List<String> result, String num, int target, int pos, long currentVal, long lastOperand, String expression) {
+        if (pos == num.length()) {
+            if (currentVal == target) {
+                result.add(expression);
+            }
+            return;
+        }
+
+        for (int i = pos; i < num.length(); i++) {
+            // Avoid numbers with leading zeros
+            if (i != pos && num.charAt(pos) == '0') break;
+
+            String currentStr = num.substring(pos, i + 1);
+            long currentNum = Long.parseLong(currentStr);
+
+            if (pos == 0) {
+                // First number in the expression
+                backtrack(result, num, target, i + 1, currentNum, currentNum, currentStr);
+            } else {
+                // Add "+"
+             backtrack(result, num, target, i + 1, currentVal + currentNum, currentNum, expression + "+" + currentStr);
+
+                // Add "-"
+                backtrack(result, num, target, i + 1, currentVal - currentNum, -currentNum, expression + "-" + currentStr);
+
+                // Add "*"
+                backtrack(result, num, target, i + 1, currentVal - lastOperand + lastOperand * currentNum, lastOperand * currentNum, expression + "*" + currentStr);
+            }
+        }
+    }
+}
