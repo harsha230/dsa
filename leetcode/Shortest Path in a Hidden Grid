@@ -1,0 +1,90 @@
+
+Approach 1 
+
+This solution uses a combination of Depth-First Search (DFS) to explore and map the grid, followed by Breadth-First Search (BFS) 
+to find the shortest path to the target. The DFS starts from the initial position, marking cells as either empty (1), target (2), 
+or blocked (0), and stores this information in a gridMap. After the grid is mapped, BFS is applied to compute the minimum distance
+from the starting point to the target cell. The time complexity of the solution is O(m * n) because both DFS and BFS can potentially 
+visit every cell in the grid once. The space complexity is also O(m * n) due to storing the grid in the gridMap, and the BFS queue and
+DFS stack both growing proportionally to the number of cells.
+
+
+class Solution {
+    char[] directions = {'U', 'D', 'L', 'R'};
+    char[] oppositeDirections = {'D', 'U', 'R', 'L'}; // Opposite directions for backtracking
+    int[][] moves = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Corresponding changes in x and y for each direction
+    Map<String, Integer> gridMap = new HashMap<>(); // To store visited cells (x, y) => value (1 = empty, 2 = target, 0 = blocked)
+    
+    public int findShortestPath(GridMaster master) {
+        // Mark the starting position as (0, 0) in the grid
+        dfs(master, 0, 0); // Perform DFS to map out the grid
+        return bfs();      // After mapping, perform BFS to find the shortest path
+    }
+
+    // Perform BFS on the mapped grid to find the shortest path
+    private int bfs() {
+        Queue<int[]> queue = new LinkedList<>();
+        Set<String> visited = new HashSet<>();
+        queue.offer(new int[]{0, 0, 0});  // {x, y, distance}
+        visited.add("0,0");
+
+        while (!queue.isEmpty()) {
+            int[] current = queue.poll();
+            int x = current[0];
+            int y = current[1];
+            int distance = current[2];
+
+            String key = x + "," + y;
+            if (gridMap.get(key) == 2) {  // If this is the target cell
+                return distance;
+            }
+
+            // Explore neighbors (Up, Down, Left, Right)
+            for (int i = 0; i < 4; i++) {
+                int newX = x + moves[i][0];
+                int newY = y + moves[i][1];
+                String newKey = newX + "," + newY;
+                
+                if (gridMap.containsKey(newKey) && gridMap.get(newKey) != 0 && !visited.contains(newKey)) {
+                    visited.add(newKey);
+                    queue.offer(new int[]{newX, newY, distance + 1});
+                }
+            }
+        }
+        return -1;  // If no path to the target exists
+    }
+
+    // Perform DFS to map the grid
+    private void dfs(GridMaster master, int x, int y) {
+        String key = x + "," + y;
+
+        // If already visited, return
+        if (gridMap.containsKey(key)) {
+            return;
+        }
+
+        // If we're at the target
+        if (master.isTarget()) {
+            gridMap.put(key, 2);  // Mark target
+        } else {
+            gridMap.put(key, 1);  // Mark as empty cell
+        }
+
+        // Explore neighbors (Up, Down, Left, Right)
+        for (int i = 0; i < 4; i++) {
+            char dir = directions[i];
+            int newX = x + moves[i][0];
+            int newY = y + moves[i][1];
+
+            // If we can move in the given direction
+            if (master.canMove(dir)) {
+                // Move in that direction
+                master.move(dir);
+                dfs(master, newX, newY);  // Perform DFS on the new position
+
+                // Move back to the original position after DFS
+                master.move(oppositeDirections[i]);
+            }
+        }
+    }
+}
