@@ -1,0 +1,126 @@
+Approach 1 Sort With Custom Comparator
+class Solution {
+    public List<Integer> findClosestElements(int[] arr, int k, int x) {
+        // Convert from array to list first to make use of Collections.sort()
+        List<Integer> sortedArr = new ArrayList<Integer>();
+        for (int num: arr) {
+            sortedArr.add(num);
+        }
+        
+        // Sort using custom comparator
+        Collections.sort(sortedArr, (num1, num2) -> Math.abs(num1 - x) - Math.abs(num2 - x));
+        
+        // Only take k elements
+        sortedArr = sortedArr.subList(0, k);
+        
+        // Sort again to have output in ascending order
+        Collections.sort(sortedArr);
+        return sortedArr;
+    }
+}
+ime complexity: O(N⋅log(N)+k⋅log(k)).
+
+To build sortedArr, we need to sort every element in the array by a new criteria: x - num. This costs O(N⋅log(N)). 
+Then, we have to sort sortedArr again to get the output in ascending order. This costs O(k⋅log(k)) time since sortedArr.length is only k.
+
+Space complexity: O(N).
+
+Before we slice sortedArr to contain only k elements, it contains every element from arr, which requires O(N) extra space.
+Note that we can use less space if we sort the input in place.
+
+Approach 2 Binary Search + Sliding Window
+
+This approach first uses binary search to find the position of the element in the array that is closest to the target value `x`. 
+Once this position is found, a sliding window is initialized around this position and expanded in both directions to include the `k` closest elements. 
+The window expands based on comparing the absolute difference between elements and `x`, always moving towards the side with the closer element. 
+This ensures that the closest elements are captured. The time complexity of the binary search is O(log n), and expanding the window takes O(k),
+resulting in an overall time complexity of **O(log n + k)**. The space complexity is **O(k)** for storing the result.
+
+class Solution {
+    public List<Integer> findClosestElements(int[] arr, int k, int x) {
+        List<Integer> result = new ArrayList<Integer>();
+        
+        // Base case
+        if (arr.length == k) {
+            for (int i = 0; i < k; i++) {
+                result.add(arr[i]);
+            }
+            
+            return result;
+        }
+        
+        // Binary search to find the closest element
+        int left = 0;
+        int right = arr.length;
+        int mid = 0;
+        while (left < right) {
+            mid = (left + right) / 2;
+            if (arr[mid] >= x) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        
+        // Initialize our sliding window's bounds
+        left -= 1;
+        right = left + 1;
+        
+        // While the window size is less than k
+        while (right - left - 1 < k) {
+            // Be careful to not go out of bounds
+            if (left == -1) {
+                right += 1;
+                continue;
+            }
+            
+            // Expand the window towards the side with the closer number
+            // Be careful to not go out of bounds with the pointers
+            if (right == arr.length || Math.abs(arr[left] - x) <= Math.abs(arr[right] - x)) {
+                left -= 1;
+            } else {
+                right += 1;
+            }
+        } 
+
+        // Build and return the window
+        for (int i = left + 1; i < right; i++) {
+            result.add(arr[i]);
+        }
+        
+        return result;
+    }
+}
+
+Approach 3
+This approach utilizes a binary search to efficiently identify the starting index of the `k` closest elements to the target value `x` within a sorted array. 
+The binary search operates by comparing the absolute differences between `x` and the elements in the array, specifically evaluating the difference between `x` and 
+the element at the midpoint and the element `k` positions ahead. If the left side of the midpoint has a smaller distance, the search moves right; otherwise, 
+it stays or moves left. Once the optimal starting index is found, a sublist of the next `k` elements is extracted and returned. 
+The time complexity of this method is **O(log(n - k))** due to the binary search, and the space complexity is **O(k)** for storing the result list.
+
+class Solution {
+    public List<Integer> findClosestElements(int[] arr, int k, int x) {
+        // Initialize binary search bounds
+        int left = 0;
+        int right = arr.length - k;
+        
+        // Binary search against the criteria described
+        while (left < right) {
+            int mid = (left + right) / 2;
+            if (x - arr[mid] > arr[mid + k] - x) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        
+        // Create output in correct format
+        List<Integer> result = new ArrayList<Integer>();
+        for (int i = left; i < left + k; i++) {
+            result.add(arr[i]);
+        }
+        
+        return result;
+    }
+}
