@@ -1,0 +1,117 @@
+Approach 1
+class Solution {
+    public String reverseWords(String s) {
+        // remove leading spaces
+        s = s.trim();
+        // split by multiple spaces
+        List<String> wordList = Arrays.asList(s.split("\\s+"));
+        Collections.reverse(wordList);
+        return String.join(" ", wordList);
+    }
+}
+
+Approach 2
+This solution reverses the words in a given string `s` by following a multi-step approach. First, it trims leading, trailing, and extra spaces between words using the `trimSpaces` method, 
+resulting in a `StringBuilder` with single spaces between words. Then, the `reverse` method reverses the entire `StringBuilder`. Afterward, the `reverseEachWord` method reverses each word in-place within 
+the `StringBuilder` to maintain correct word order in the reversed sentence. Finally, it returns the result as a `String`. The **time complexity** is \(O(n)\) for each method (`trimSpaces`, `reverse`,
+and `reverseEachWord`), leading to an overall time complexity of \(O(n)\), where \(n\) is the length of the input string. The **space complexity** is \(O(n)\), as it uses a `StringBuilder`
+to store the processed string.
+
+class Solution {
+    public StringBuilder trimSpaces(String s) {
+        int left = 0, right = s.length() - 1;
+        // remove leading spaces
+        while (left <= right && s.charAt(left) == ' ') ++left;
+
+        // remove trailing spaces
+        while (left <= right && s.charAt(right) == ' ') --right;
+
+        // reduce multiple spaces to single one
+        StringBuilder sb = new StringBuilder();
+        while (left <= right) {
+            char c = s.charAt(left);
+
+            if (c != ' ') sb.append(c);
+            else if (sb.charAt(sb.length() - 1) != ' ') sb.append(c);
+
+            ++left;
+        }
+        return sb;
+    }
+
+    public void reverse(StringBuilder sb, int left, int right) {
+        while (left < right) {
+            char tmp = sb.charAt(left);
+            sb.setCharAt(left++, sb.charAt(right));
+            sb.setCharAt(right--, tmp);
+        }
+    }
+
+    public void reverseEachWord(StringBuilder sb) {
+        int n = sb.length();
+        int start = 0, end = 0;
+
+        while (start < n) {
+            // go to the end of the word
+            while (end < n && sb.charAt(end) != ' ') ++end;
+            // reverse the word
+            reverse(sb, start, end - 1);
+            // move to the next word
+            start = end + 1;
+            ++end;
+        }
+    }
+
+    public String reverseWords(String s) {
+        // converst string to string builder
+        // and trim spaces at the same time
+        StringBuilder sb = trimSpaces(s);
+
+        // reverse the whole string
+        reverse(sb, 0, sb.length() - 1);
+
+        // reverse each word
+        reverseEachWord(sb);
+
+        return sb.toString();
+    }
+}
+
+
+Approach 3
+
+This approach reverses the words in a string while removing extra spaces. It first trims leading and trailing spaces by moving pointers from each end of the string.
+Using a `Deque`, it iterates through the string, building each word with a `StringBuilder`. When it encounters a space after a word, it adds the word to the front of the deque,
+effectively reversing the word order. Finally, it joins all words from the deque into a single string with spaces in between. The time complexity is \(O(n)\) due to a
+single pass through the string and the deque operations, while the space complexity is also \(O(n)\), as additional structures like `Deque` and `StringBuilder` store
+the words and final result.
+
+
+class Solution {
+    public String reverseWords(String s) {
+        int left = 0, right = s.length() - 1;
+        // remove leading spaces
+        while (left <= right && s.charAt(left) == ' ') ++left;
+
+        // remove trailing spaces
+        while (left <= right && s.charAt(right) == ' ') --right;
+
+        Deque<String> d = new ArrayDeque();
+        StringBuilder word = new StringBuilder();
+        // push word by word in front of deque
+        while (left <= right) {
+            char c = s.charAt(left);
+
+            if ((word.length() != 0) && (c == ' ')) {
+                d.offerFirst(word.toString());
+                word.setLength(0);
+            } else if (c != ' ') {
+                word.append(c);
+            }
+            ++left;
+        }
+        d.offerFirst(word.toString());
+
+        return String.join(" ", d);
+    }
+}
