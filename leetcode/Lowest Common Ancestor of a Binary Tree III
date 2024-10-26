@@ -1,0 +1,79 @@
+Approach 1
+
+class Solution {
+    public Node lowestCommonAncestor(Node p, Node q) {
+        // Step 1: Create a set to store the ancestors of p
+        HashSet<Node> ancestors = new HashSet<>();
+        
+        // Traverse up from p to the root, storing all ancestors
+        while (p != null) {
+            ancestors.add(p);
+            p = p.parent;
+        }
+        
+        // Step 2: Traverse up from q to find the first ancestor that is also an ancestor of p
+        while (q != null) {
+            if (ancestors.contains(q)) {
+                return q;  // Found the LCA
+            }
+            q = q.parent;
+        }
+        
+        return null;  // In case there is no common ancestor
+    }
+}
+Time Complexity
+The time complexity of this approach is O(h), where 
+h is the height of the tree. In the worst case (for a skewed tree), this can be O(n), where 
+n is the number of nodes in the tree.
+Space Complexity
+The space complexity is also O(h) due to the storage of ancestors in the set. In the worst case, it can be 
+O(n) if the tree is skewed.
+
+Approach 2
+
+The provided solution efficiently finds the lowest common ancestor (LCA) of two nodes \( p \) and \( q \) in a binary tree where each node has a 
+reference to its parent. The algorithm first computes the depth of both nodes by traversing upwards to the root. 
+It then equalizes their depths by moving the deeper node upwards until both nodes are at the same level. Finally,
+it traverses upwards from both nodes simultaneously until they meet, which identifies the LCA. 
+This approach has a time complexity of \( O(h) \), where \( h \) is the height of the tree, 
+as it involves traversing up to the root and potentially upwards again to find the LCA. The space complexity is \( O(1) \), 
+as it uses only a constant amount of extra space and does not rely on any additional data structures.
+
+
+
+public class Solution {
+    public Node lowestCommonAncestor(Node p, Node q) {
+        // Calculate the depth of p and q
+        int depthP = getDepth(p);
+        int depthQ = getDepth(q);
+
+        // Equalize the depth
+        while (depthP > depthQ) {
+            p = p.parent;
+            depthP--;
+        }
+        
+        while (depthQ > depthP) {
+            q = q.parent;
+            depthQ--;
+        }
+
+        // Move both pointers up until they meet
+        while (p != q) {
+            p = p.parent;
+            q = q.parent;
+        }
+        
+        return p; // or return q, since p == q at this point
+    }
+
+    private int getDepth(Node node) {
+        int depth = 0;
+        while (node != null) {
+            node = node.parent;
+            depth++;
+        }
+        return depth;
+    }
+}
