@@ -1,5 +1,5 @@
 
-Approach 1
+Approach 1  BFS: Two Queues
 class Solution {
     public List<Integer> rightSideView(TreeNode root) {
         if (root == null) return new ArrayList<Integer>();
@@ -101,7 +101,7 @@ In the worst case, for a balanced tree, this can be around N/2, leading to O(N) 
 In the case of a skewed tree, where all nodes are aligned to one side, the space complexity remains O(N). 
 Therefore, both time and space complexities are bounded by the number of nodes in the tree.
 
-Approach 4: Recursive DFS
+Approach 3: Recursive DFS
 
 class Solution {
     List<Integer> rightside = new ArrayList();
