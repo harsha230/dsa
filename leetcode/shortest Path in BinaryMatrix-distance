@@ -1,3 +1,17 @@
+
+
+The brute-force approach to finding the shortest clear path in a binary matrix involves using depth-first search (DFS)
+to explore all potential paths from the top-left cell `(0, 0)` to the bottom-right cell `(n - 1, n - 1)`.
+The algorithm checks if the starting or ending cell is blocked (value `1`), and if so, it returns `-1`.
+It marks cells as visited during exploration to prevent revisiting, tracking the length of each path and 
+updating the minimum length found upon reaching the destination. The DFS explores all 8 possible directions
+(horizontal, vertical, and diagonal) from the current cell. If no clear path is found, the algorithm returns `-1`.
+The time complexity of this approach is \(O(2^{n^2})\) in the worst case due to the exponential number of paths explored,
+while the space complexity is \(O(n^2)\) for the recursive call stack in the worst case.
+
+
+
+Approach 2
 class Solution {
     
     private static final int[][] directions = 
