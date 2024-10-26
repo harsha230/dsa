@@ -1,4 +1,4 @@
-Approach 1
+Approach 1 Stack
 
 class Solution {
     public int calculate(String s) {
@@ -41,7 +41,7 @@ Time Complexity: O(n), where n is the length of the string s. We iterate over th
 
 Space Complexity: O(n), where n is the length of the string s.
 
-
+APproach 2 without stack
 import java.util.Deque;
 import java.util.ArrayDeque;
 
