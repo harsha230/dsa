@@ -1,0 +1,96 @@
+Approach 1
+
+This BFS-based solution connects each node in a perfect binary tree to its next right node. 
+The method starts by adding the `root` node to a queue, which is processed level by level. 
+For each level, the solution tracks the previous node (`prev`) in order to set its `next` pointer 
+to the current node (`current`). At the end of each level, the last node's `next` pointer is set to `null`,
+ensuring correct level-end handling. Children of each node are added to the queue, making the approach efficient for this level-wise traversal.
+
+### Complexity Analysis
+- **Time Complexity**: \( O(n) \), where \( n \) is the number of nodes, since each node is visited once.
+- **Space Complexity**: \( O(n) \), where \( n \) is the maximum number of nodes in a level (i.e., the size of the queue in the last level).
+
+class Solution {
+    public Node connect(Node root) {
+        if (root == null) return null;
+        
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(root);
+        
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            Node prev = null;
+            
+            for (int i = 0; i < size; i++) {
+                Node current = queue.poll();
+                
+                if (prev != null) {
+                    prev.next = current;
+                }
+                prev = current;
+                
+                if (current.left != null) {
+                    queue.add(current.left);
+                }
+                if (current.right != null) {
+                    queue.add(current.right);
+                }
+            }
+            
+            prev.next = null;
+        }
+        
+        return root;
+    }
+}
+
+
+Approach 2
+
+This approach efficiently connects nodes at each level of a perfect binary tree without using extra space,
+leveraging existing tree structure. Starting with the root node as the `leftmost` node of the current level, 
+the algorithm iterates across each level. For each node, it sets the `next` pointer of its left child to its 
+right child (Connection 1). If the node has a `next` neighbor, it also links its right child to the left child of
+the `next` node (Connection 2). After processing all nodes at the current level, the algorithm moves `leftmost` 
+to the leftmost child of the next level and repeats until reaching the last level. 
+
+- **Time Complexity**: \(O(n)\), as it processes each node once.
+- **Space Complexity**: \(O(1)\), since it uses only constant extra space by modifying pointers within the tree itself.
+
+class Solution {
+    public Node connect(Node root) {
+        if (root == null) {
+            return root;
+        }
+
+        // Start with the root node. There are no next pointers
+        // that need to be set up on the first level
+        Node leftmost = root;
+
+        // Once we reach the final level, we are done
+        while (leftmost.left != null) {
+            // Iterate the "linked list" starting from the head
+            // node and using the next pointers, establish the
+            // corresponding links for the next level
+            Node head = leftmost;
+
+            while (head != null) {
+                // CONNECTION 1
+                head.left.next = head.right;
+
+                // CONNECTION 2
+                if (head.next != null) {
+                    head.right.next = head.next.left;
+                }
+
+                // Progress along the list (nodes on the current level)
+                head = head.next;
+            }
+
+            // Move onto the next level
+            leftmost = leftmost.left;
+        }
+
+        return root;
+    }
+}
