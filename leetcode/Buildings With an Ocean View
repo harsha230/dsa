@@ -1,0 +1,64 @@
+Approach 1
+class Solution {
+    public int[] findBuildings(int[] heights) {
+        int n = heights.length;
+        List<Integer> list = new ArrayList<>();
+        
+        for (int current = 0; current < n; ++current) {
+            // If the current building is taller, 
+            // it will block the shorter building's ocean view to its left.
+            // So we pop all the shorter buildings that have been added before.
+            while (!list.isEmpty() && heights[list.get(list.size() - 1)] <= heights[current]) {
+                list.remove(list.size() - 1);
+            }
+            list.add(current);
+        }
+ 
+        // Push elements from list to answer array.
+        int[] answer = new int[list.size()];
+        for (int i = 0; i < list.size(); ++i) {
+            answer[i] = list.get(i);
+        }
+        
+        return answer;
+    }
+}
+
+Time complexity: O(N).
+
+We iterate over the given array once.
+Each building's index can be pushed to answer and popped from answer at most once, and both of the operations take O(1) time.
+In Java, copying the elements from an array list to an integer array will take an additional O(N) time.
+Space complexity: O(N).
+
+There is no auxiliary space used other than the output. The output does not count towards the space complexity. However, in the worst-case scenario, answer may contain as many as N−1 indices, and then the very last building is the tallest, so the output will reduce to one index. In this scenario, the algorithm must store N−1 elements at some point, but only 1 element is included in the output.
+In Java, in order to maintain a dynamic size array, we created an extra Array List that supports fast O(1) push/pop operation. Array List can contain at most N elements. Hence in Java, an additional O(N) space is used.
+
+
+Approach 2
+class Solution {
+    public int[] findBuildings(int[] heights) {
+        int n = heights.length;
+        List<Integer> list = new ArrayList<>();
+        int maxHeight = -1;
+        
+        for (int current = n - 1; current >= 0; --current) {
+            // If there is no building higher (or equal) than the current one to its right,
+            // push it in the list.
+            if (maxHeight < heights[current]) {
+                list.add(current);
+                
+                // Update max building till now.
+                maxHeight = heights[current];
+            }
+        }
+        
+        // Push building indices from list to answer array in reverse order.
+        int[] answer = new int[list.size()];
+        for (int i = 0; i < list.size(); ++i) {
+            answer[i] = list.get(list.size() - 1 - i);
+        }
+        
+        return answer;
+    }
+}
