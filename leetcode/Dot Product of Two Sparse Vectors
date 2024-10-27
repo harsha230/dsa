@@ -1,3 +1,28 @@
+
+
+
+Approach 1 Non-efficient Array Approach
+class SparseVector {
+
+    private int[] array;
+
+    SparseVector(int[] nums) {
+        array = nums;
+    }
+
+    public int dotProduct(SparseVector vec) {
+        int result = 0;
+
+        for (int i = 0; i < array.length; i++) {
+            result += array[i] * vec.array[i];
+        }
+        return result;
+    }   
+}
+
+Approach 2
+
+
 class SparseVector {
     // Store only non-zero elements and their indices
     private List<int[]> nonZeroElements;
@@ -38,3 +63,24 @@ class SparseVector {
         return result;
     }
 }Dot Product of Two Sparse Vectors
+
+
+
+for Follow up
+
+public int dotProductNonSparse(int[] nums) {
+        int result = 0;
+
+        // Iterate through the non-zero elements of the sparse vector
+        for (int[] element : nonZeroElements) {
+            int index = element[0];
+            int value = element[1];
+
+            // Check if the corresponding index in the non-sparse vector is non-zero
+            if (index < nums.length) {
+                result += value * nums[index];
+            }
+        }
+
+        return result;
+    }
