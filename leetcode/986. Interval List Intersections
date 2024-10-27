@@ -33,3 +33,36 @@ class Solution {
     }
 
 }
+Time Complexity: O(M+N), where M,N are the lengths of A and B respectively.
+
+Space Complexity: O(M+N), the maximum size of the answer.
+
+Approach 2
+public class IntervalUnion {
+    public int[][] intervalUnion(int[][] firstList, int[][] secondList) {
+        List<int[]> unionList = new ArrayList<>();
+        int i = 0, j = 0;
+
+        // Merge both lists in sorted order by interval start times
+        while (i < firstList.length || j < secondList.length) {
+            int[] interval;
+
+            // Decide whether to pick from firstList or secondList based on the starting times
+            if (j >= secondList.length || (i < firstList.length && firstList[i][0] <= secondList[j][0])) {
+                interval = firstList[i++];
+            } else {
+                interval = secondList[j++];
+            }
+
+            // If the union list is empty or there's no overlap with the last interval, add the interval
+            if (unionList.isEmpty() || unionList.get(unionList.size() - 1)[1] < interval[0]) {
+                unionList.add(interval);
+            } else {
+                // Merge the intervals by extending the end time of the last interval if needed
+                unionList.get(unionList.size() - 1)[1] = Math.max(unionList.get(unionList.size() - 1)[1], interval[1]);
+            }
+        }
+
+        // Convert list of intervals to array
+        return unionList.toArray(new int[unionList.size()][]);
+    }
