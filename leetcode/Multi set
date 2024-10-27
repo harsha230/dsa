@@ -1,0 +1,60 @@
+import java.util.HashMap;
+
+public class MultiSet<T> {
+    private HashMap<T, Integer> elements;
+
+    public MultiSet() {
+        elements = new HashMap<>();
+    }
+
+    // Add an element to the multiset in O(1) time
+    public void add(T element) {
+        elements.put(element, elements.getOrDefault(element, 0) + 1);
+    }
+
+    // Remove an element from the multiset in O(1) time
+    public boolean remove(T element) {
+        if (!elements.containsKey(element)) {
+            return false;  // Element not in multiset
+        }
+        
+        int count = elements.get(element);
+        if (count > 1) {
+            elements.put(element, count - 1);
+        } else {
+            elements.remove(element);
+        }
+        return true;
+    }
+
+    // Count occurrences of an element in O(1) time
+    public int count(T element) {
+        return elements.getOrDefault(element, 0);
+    }
+
+    // For debugging: print the multiset
+    public void printMultiSet() {
+        System.out.println(elements);
+    }
+
+    public static void main(String[] args) {
+        MultiSet<String> multiSet = new MultiSet<>();
+
+        // Adding elements
+        multiSet.add("apple");
+        multiSet.add("apple");
+        multiSet.add("banana");
+
+        // Count occurrences
+        System.out.println("Count of 'apple': " + multiSet.count("apple")); // Output: 2
+        System.out.println("Count of 'banana': " + multiSet.count("banana")); // Output: 1
+        System.out.println("Count of 'orange': " + multiSet.count("orange")); // Output: 0
+
+        // Removing elements
+        multiSet.remove("apple");
+        System.out.println("Count of 'apple' after one removal: " + multiSet.count("apple")); // Output: 1
+
+        // Print final multiset
+        multiSet.printMultiSet();
+    }
+}
