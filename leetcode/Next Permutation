@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+Brute Force
 public class NextPermutationBruteForce {
 
     // Function to compute next permutation using brute force
@@ -80,20 +77,48 @@ public class NextPermutationBruteForce {
         return true;
     }
 
-    public static void main(String[] args) {
-        // Example 1
-        int[] nums1 = {1, 2, 3};
-        nextPermutation(nums1);
-        System.out.println("Next permutation: " + Arrays.toString(nums1));
+}
 
-        // Example 2
-        int[] nums2 = {3, 2, 1};
-        nextPermutation(nums2);
-        System.out.println("Next permutation: " + Arrays.toString(nums2));
+Approach 2 Optimal
 
-        // Example 3
-        int[] nums3 = {1, 1, 5};
-        nextPermutation(nums3);
-        System.out.println("Next permutation: " + Arrays.toString(nums3));
+class Solution {
+    public void nextPermutation(int[] nums) {
+        
+        int i=nums.length-1;
+         for(; i>=1;i--){
+          if(nums[i]>nums[i-1]){
+            break;
+          }
+         }
+         if(i==0){
+            reverse(nums,0);
+             return ;
+         }else if(i>0){
+            i--;
+         }
+
+         int j=i+1;
+         for(;j<nums.length;j++){
+               if(nums[i]>=nums[j]){
+                     break;
+               }
+         }
+        swap(nums,i,j-1);
+        reverse(nums,i+1);
     }
+   private void reverse(int[] nums, int start) {
+        int i = start, j = nums.length - 1;
+        while (i < j) {
+            swap(nums, i, j);
+            i++;
+            j--;
+        }
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+
 }
