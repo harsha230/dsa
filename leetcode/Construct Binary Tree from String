@@ -1,0 +1,77 @@
+
+
+Approach 1 Reursive
+
+The provided code implements a recursive approach to construct a binary tree from a given string representation, 
+where the format specifies the root value followed by optional left and right children enclosed in parentheses. 
+The `str2tree` method initiates the process, calling `str2treeInternal`, which parses the string recursively. 
+The `getNumber` helper function extracts integers, handling potential negative signs. The algorithm processes 
+each character in the string, building the tree nodes based on the parentheses that denote child relationships. 
+The time complexity of this approach is **O(n)**, where **n** is the length of the input string, as each character 
+is processed exactly once. The space complexity is **O(h)**, where **h** is the height of the tree, representing the maximum 
+depth of the recursive call stack, which could be up to **O(n)** in the worst case (for skewed trees) or **O(log n)** for balanced trees.
+
+
+class Solution {
+    public TreeNode str2tree(String s) {
+        return this.str2treeInternal(s, 0).getKey();
+    }
+    
+    public Pair<Integer, Integer> getNumber(String s, int index) {
+        
+        boolean isNegative = false;
+        
+        // A negative number
+        if (s.charAt(index) == '-') {
+            isNegative = true;
+            index++;
+        }
+            
+        int number = 0;
+        while (index < s.length() && Character.isDigit(s.charAt(index))) {
+            number = number * 10 + (s.charAt(index) - '0');
+            index++;
+        }
+        
+        return new Pair<Integer, Integer>(isNegative ? -number : number, index);
+    } 
+    
+    public Pair<TreeNode, Integer> str2treeInternal(String s, int index) {
+        
+        if (index == s.length()) {
+            return new Pair<TreeNode, Integer>(null, index);
+        }
+        
+        // Start of the tree will always contain a number representing
+        // the root of the tree. So we calculate that first.
+        Pair<Integer, Integer> numberData = this.getNumber(s, index);
+        int value = numberData.getKey();
+        index = numberData.getValue();
+        
+        TreeNode node = new TreeNode(value);
+        Pair<TreeNode, Integer> data;
+        
+        // Next, if there is any data left, we check for the first subtree
+        // which according to the problem statement will always be the left child.
+        if (index < s.length() && s.charAt(index) == '(') {
+            data = this.str2treeInternal(s, index + 1);
+            node.left = data.getKey();
+            index = data.getValue();
+        }
+            
+        
+        // Indicates a right child
+        if (node.left != null && index < s.length() && s.charAt(index) == '(') {
+            data = this.str2treeInternal(s, index + 1);
+            node.right = data.getKey();
+            index = data.getValue();
+        }
+            
+        
+        return new Pair<TreeNode, Integer>(node, index < s.length() && s.charAt(index) == ')' ? index + 1 : index);
+    }
+}
+
+
+Approach 2 using stacks
+
