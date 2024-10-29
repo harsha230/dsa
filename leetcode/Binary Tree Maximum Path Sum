@@ -1,0 +1,113 @@
+
+Brute Force 
+The brute-force approach to finding the maximum path sum in a binary tree involves exploring every possible path,
+starting from each node, and calculating the path sum recursively. For each node, it computes the maximum path sum 
+by considering paths that include only the node itself, the node plus its left child, the node plus its right child,
+or the node plus both children. Using a helper function, it recursively evaluates paths through all possible nodes to
+calculate the maximum path sum in the subtree of each node, updating a global maximum whenever a higher path sum is found. 
+
+The time complexity of this approach is \(O(N^2)\) in the worst case, where \(N\) is the number of nodes in the tree.
+This is because, for each node, we are recalculating path sums for each subtree without caching results, leading to 
+redundant calculations. The space complexity is \(O(N)\), due to the recursive call stack depth, which is proportional
+to the height of the tree, and can go up to \(N\) in an unbalanced tree. This inefficiency in time complexity makes the
+brute-force approach impractical for large binary trees.
+
+class TreeNode {
+    int val;
+    TreeNode left;
+    TreeNode right;
+
+    TreeNode(int x) {
+        val = x;
+    }
+}
+
+class Solution {
+    int maxPathSum;
+
+    public int maxPathSum(TreeNode root) {
+        maxPathSum = Integer.MIN_VALUE;
+        calculatePaths(root);
+        return maxPathSum;
+    }
+
+    private void calculatePaths(TreeNode node) {
+        if (node == null) {
+            return;
+        }
+
+        // Compute the maximum path sum starting from each possible path that includes this node
+        int leftSum = pathSumFromNode(node.left, 0);
+        int rightSum = pathSumFromNode(node.right, 0);
+
+        // Calculate path sum that passes through this node
+        int currentMax = Math.max(node.val, node.val + leftSum);
+        currentMax = Math.max(currentMax, node.val + rightSum);
+        currentMax = Math.max(currentMax, node.val + leftSum + rightSum);
+
+        // Update the global maximum path sum if the current path sum is greater
+        maxPathSum = Math.max(maxPathSum, currentMax);
+
+        // Continue to explore paths from children
+        calculatePaths(node.left);
+        calculatePaths(node.right);
+    }
+
+    private int pathSumFromNode(TreeNode node, int currentSum) {
+        if (node == null) {
+            return currentSum;
+        }
+        currentSum += node.val;
+
+        // Calculate the path sum from left and right children
+        int leftSum = pathSumFromNode(node.left, currentSum);
+        int rightSum = pathSumFromNode(node.right, currentSum);
+
+        // Return the maximum path sum from this node
+        return Math.max(leftSum, rightSum);
+    }
+}
+
+
+Approach 2
+
+The provided solution for finding the maximum path sum in a binary tree utilizes a post-order traversal technique. 
+The method `maxPathSum` initializes a variable `maxSum` to store the maximum path sum found during the traversal. 
+The helper function `gainFromSubtree` recursively calculates the maximum gain from the left and right subtrees for each node. 
+It updates the `maxSum` by considering the sum of the current node's value and the maximum gains from its left and right children,
+ensuring to ignore negative gains by using `Math.max` to return zero when necessary. This effectively considers all possible paths
+while avoiding paths that would decrease the total sum. The overall time complexity of the algorithm is O(n), where n is the number 
+of nodes in the tree, as it visits each node exactly once. The space complexity is O(h), where h is the height of the tree, due to
+the recursive call stack used in the traversal. In the worst case, for a skewed tree, the space complexity could reach O(n).
+
+class Solution {
+    public int maxPathSum(TreeNode root) {
+        maxSum = Integer.MIN_VALUE;
+        gainFromSubtree(root);
+        return maxSum;
+    }
+
+    private int maxSum;
+
+    // post order traversal of subtree rooted at `root`
+    private int gainFromSubtree(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+
+        // add the path sum from left subtree. Note that if the path
+        // sum is negative, we can ignore it, or count it as 0.
+        // This is the reason we use `Math.max` here.
+        int gainFromLeft = Math.max(gainFromSubtree(root.left), 0);
+
+        // add the path sum from right subtree. 0 if negative
+        int gainFromRight = Math.max(gainFromSubtree(root.right), 0);
+
+        // if left or right path sum are negative, they are counted
+        // as 0, so this statement takes care of all four scenarios
+        maxSum = Math.max(maxSum, gainFromLeft + gainFromRight + root.val);
+
+        // return the max sum for a path starting at the root of subtree
+        return Math.max(gainFromLeft + root.val, gainFromRight + root.val);
+    }
+}
