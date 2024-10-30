@@ -1,0 +1,135 @@
+Approach 1
+
+
+This solution determines if a string `s` can become a palindrome by deleting at most `k` characters.
+It uses a recursive approach with memoization. The helper function `isValidPalindrome(s, i, j)` 
+recursively calculates the minimum deletions required to make the substring `s[i...j]` a palindrome.
+The base cases handle single and two-character substrings directly. If characters at `i` and `j` are the same,
+the function moves inward without deletions. If they differ, it recursively tries deleting either `s[i]` or `s[j]`
+and takes the minimum deletions required from both choices, adding one to account for the deletion. Memoization ensures
+each substring result is computed once, stored in a 2D array `memo`, to avoid redundant calculations. The main function, 
+`isValidPalindrome(String s, int k)`, calls the helper for the entire string and checks if the minimum deletions needed are within 
+`k`. The time complexity is \(O(n^2)\), as there are \(n^2\) subproblems, and the space complexity is also \(O(n^2)\) due to the memoization table.
+
+class Solution {
+    Integer memo[][];
+    int isValidPalindrome(String s, int i, int j) {
+
+        // Base case, only 1 letter remaining.
+        if (i == j)
+            return 0;
+
+        // Base case 2, only 2 letters remaining.
+        if (i == j - 1)
+            return s.charAt(i) != s.charAt(j) ? 1 : 0;
+
+        //Return the precomputed value if exists.
+        if (memo[i][j] != null)
+            return memo[i][j];
+
+        // Case 1: Character at `i` equals character at `j`
+        if (s.charAt(i) == s.charAt(j))
+            return memo[i][j] = isValidPalindrome(s, i + 1, j - 1);
+
+        // Case 2: Character at `i` does not equal character at `j`.
+        // Either delete character at `i` or delete character at `j`
+        // and try to match the two pointers using recursion.
+        // We need to take the minimum of the two results and add 1
+        // representing the cost of deletion.
+        return memo[i][j] = 1 + Math.min(isValidPalindrome(s, i + 1, j), isValidPalindrome(s, i, j - 1));
+    }
+public boolean isValidPalindrome(String s, int k) {
+        memo = new Integer[s.length()][s.length()];
+
+        // Return true if the minimum cost to create a palindrome by only deleting the letters
+        // is less than or equal to `k`.
+        return isValidPalindrome(s, 0, s.length() - 1) <= k;
+    }
+};
+
+Approach 2
+
+This iterative dynamic programming approach determines if a string can be transformed into a palindrome by deleting at most `k` characters.
+We use a 2D array `memo`, where `memo[i][j]` holds the minimum number of deletions required to make the substring `s[i...j]` palindromic.
+Starting from the end of the string and building up smaller substrings, we check if characters `s[i]` and `s[j]` are equal. If they are,
+no deletion is needed, so `memo[i][j]` takes the value from `memo[i+1][j-1]`. If not, we add one deletion and take the minimum between deleting 
+`s[i]` or `s[j]`. The final answer, `memo[0][n-1]`, gives the minimum deletions required to make the entire string a palindrome. If this value is `<= k`
+, we return true. The time complexity is \(O(n^2)\), and the space complexity is also \(O(n^2)\) due to the `memo` table.
+
+class Solution {
+public boolean isValidPalindrome(String s, int k) {
+        int memo[][] = new int[s.length()][s.length()];
+
+        // Generate all combinations of `i` and `j` in the correct order.
+        for (int i = s.length() - 2; i >= 0; i--)
+            for (int j = i + 1; j < s.length(); j++) {
+                // Case 1: Character at `i` equals character at `j`
+                if (s.charAt(i) == s.charAt(j))
+                    memo[i][j] = memo[i + 1][j - 1];
+
+                // Case 2: Character at `i` does not equal character at `j`.
+                // Either delete character at `i` or delete character at `j`
+                // and try to match the two pointers using recursion.
+                // We need to take the minimum of the two results and add 1
+                // representing the cost of deletion.
+                else
+                    memo[i][j] = 1 + Math.min(memo[i + 1][j], memo[i][j - 1]);
+            }
+
+        // Return true if the minimum cost to create a palindrome by only deleting the letters
+        // is less than or equal to `k`.
+        return memo[0][s.length() - 1] <= k;
+    }
+};
+
+Approach 3
+
+class Solution {
+public boolean isValidPalindrome(String s, int k) {
+        int memo[] = new int[s.length()];
+
+        // To store the previous required values from memo.
+        int temp, prev;
+
+        // Generate all combinations of `i` and `j` in the correct order.
+        for (int i = s.length() - 2; i >= 0; i--) {
+            // 'prev' stores the value at memo[i+1][j-1];
+            prev = 0;
+            for (int j = i + 1; j < s.length(); j++) {
+                // Store the value of memo[i+1][j] temporarily.
+                temp = memo[j];
+
+                // Case 1: Character at `i` equals character at `j`
+                if (s.charAt(i) == s.charAt(j))
+                    memo[j] = prev;
+
+                // Case 2: Character at `i` does not equal character at `j`.
+                // Either delete character at `i` or delete character at `j`
+                // and try to match the two pointers using recursion.
+                // We need to take the minimum of the two results and add 1
+                // representing the cost of deletion.
+                else
+
+                    // memo[j] will contain the value for memo[i+1][j]
+                    // memo[j-1] will contain the value for memo[i][j-1]
+                    memo[j] = 1 + Math.min(memo[j], memo[j - 1]);
+
+                // Copy the value of memo[i+1][j] to `prev`
+                // For the next iteration when j=j+1
+                // `prev` will hold the value memo[i+1][j-1];
+                prev = temp;
+            }
+        }
+
+        // Return true if the minimum cost to create a palindrome by only deleting the letters
+        // is less than or equal to `k`.
+        return memo[s.length() - 1] <= k;
+    }
+};
+
+This approach checks if a string can be transformed into a palindrome by deleting at most `k` characters, using an optimized dynamic programming method 
+with a single 1D array `memo`. Here, `memo[j]` holds the minimum deletions required to make the substring from `i` to `j` a palindrome. 
+Two temporary variables, `temp` and `prev`, are used to store values for adjacent computations, replacing the need for a 2D array.
+For each character pair `(i, j)`, if `s[i]` equals `s[j]`, no deletion is needed, so `memo[j] = prev`. Otherwise, we take the minimum of 
+deleting either `s[i]` or `s[j]`, with `memo[j] = 1 + Math.min(memo[j], memo[j - 1])`. At the end, if `memo[s.length() - 1] <= k`, the transformation 
+is possible. The time complexity is \(O(n^2)\), and the space complexity is \(O(n)\), achieved by maintaining only the current row values in `memo`.
