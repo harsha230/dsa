@@ -1,0 +1,49 @@
+The `RandomizedSet` class efficiently implements a set that allows for the insertion, removal, and 
+retrieval of random elements in constant time. It uses a combination of a hash map (`dict`) to store 
+the values and their respective indices in a list (`list`), ensuring that both insertion and removal operations are \(O(1)\).
+The `insert` method adds a new value to the set if it does not already exist, while the `remove` method eliminates a specified value, 
+relocating the last element to fill the gap to maintain the list's continuity. The `getRandom` method retrieves a random element
+from the list using a random index, which also operates in \(O(1)\) time. The overall space complexity of this implementation 
+is \(O(n)\), where \(n\) is the number of elements in the set, as both the list and dictionary store all elements. In summary,
+the `RandomizedSet` is a space-efficient and time-efficient data structure for managing unique elements while allowing for random access.
+
+class RandomizedSet {
+  Map<Integer, Integer> dict;
+  List<Integer> list;
+  Random rand = new Random();
+
+  /** Initialize your data structure here. */
+  public RandomizedSet() {
+    dict = new HashMap();
+    list = new ArrayList();
+  }
+
+  /** Inserts a value to the set. Returns true if the set did not already contain the specified element. */
+  public boolean insert(int val) {
+    if (dict.containsKey(val)) return false;
+
+    dict.put(val, list.size());
+    list.add(list.size(), val);
+    return true;
+  }
+
+  /** Removes a value from the set. Returns true if the set contained the specified element. */
+  public boolean remove(int val) {
+    if (! dict.containsKey(val)) return false;
+
+    // move the last element to the place idx of the element to delete
+    int lastElement = list.get(list.size() - 1);
+    int idx = dict.get(val);
+    list.set(idx, lastElement);
+    dict.put(lastElement, idx);
+    // delete the last element
+    list.remove(list.size() - 1);
+    dict.remove(val);
+    return true;
+  }
+
+  /** Get a random element from the set. */
+  public int getRandom() {
+    return list.get(rand.nextInt(list.size()));
+  }
+}
