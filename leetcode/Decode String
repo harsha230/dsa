@@ -1,0 +1,101 @@
+This approach uses a stack to decode an encoded string by handling each character in the input one by one. When encountering `]`,
+it extracts the substring within the matching `[` and decodes it. To do this, it first builds the encoded substring in reverse by 
+popping characters until reaching `[`. Then, it pops digits to get the repeat count `k`, calculating it by handling multiple digits 
+in reverse order. The substring is then repeated `k` times and each character is pushed back to the stack. At the end, all characters 
+in the stack are joined to form the decoded string. The time complexity is \(O(n \cdot k)\), where \(n\) is the length of the string 
+and \(k\) is the maximum repeat count, as each character could be processed multiple times during repetitions. The space complexity 
+is \(O(n)\), driven by stack usage for characters and intermediate substrings.
+
+class Solution {
+    public String decodeString(String s) {
+        Stack<Character> stack = new Stack<>();
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == ']') {
+                List<Character> decodedString = new ArrayList<>();
+                // get the encoded string
+                while (stack.peek() != '[') {
+                    decodedString.add(stack.pop());
+                }
+                // pop [ from the stack
+                stack.pop();
+                int base = 1;
+                int k = 0;
+                // get the number k
+                while (!stack.isEmpty() && Character.isDigit(stack.peek())) {
+                    k = k + (stack.pop() - '0') * base;
+                    base *= 10;
+                }
+                // decode k[decodedString], by pushing decodedString k times into stack
+                while (k != 0) {
+                    for (int j = decodedString.size() - 1; j >= 0; j--) {
+                        stack.push(decodedString.get(j));
+                    }
+                    k--;
+                }
+            }
+            // push the current character to stack
+            else {
+                stack.push(s.charAt(i));
+            }
+        }      
+        // get the result from stack
+        char[] result = new char[stack.size()];
+        for (int i = result.length - 1; i >= 0; i--) {
+            result[i] = stack.pop();
+        }
+        return new String(result);
+    }
+}
+
+Approach 2
+This approach uses recursion to decode the string by processing each character sequentially.
+It builds the decoded result as it traverses, using an `index` variable to keep track of the 
+current position in the string. When a digit is encountered, it calculates the repeat count `k` 
+(potentially multiple digits), skips the opening bracket `[`, and recursively decodes the substring within 
+the brackets by calling `decodeString` again. Once the substring is decoded, it skips the closing bracket `]` 
+and appends the decoded substring `k` times to the result. This recursive call stack structure handles nested encodings seamlessly. 
+The time complexity is \(O(n \cdot k)\), where \(n\) is the length of the string and \(k\) is the maximum repeat count,
+as each character might be appended multiple times. The space complexity is \(O(n)\) due to the recursive stack depth and result building.
+
+class Solution {
+    public String decodeString(String s) {
+        Stack<Character> stack = new Stack<>();
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == ']') {
+                List<Character> decodedString = new ArrayList<>();
+                // get the encoded string
+                while (stack.peek() != '[') {
+                    decodedString.add(stack.pop());
+                }
+                // pop [ from the stack
+                stack.pop();
+                int base = 1;
+                int k = 0;
+                // get the number k
+                while (!stack.isEmpty() && Character.isDigit(stack.peek())) {
+                    k = k + (stack.pop() - '0') * base;
+                    base *= 10;
+                }
+                // decode k[decodedString], by pushing decodedString k times into stack
+                while (k != 0) {
+                    for (int j = decodedString.size() - 1; j >= 0; j--) {
+                        stack.push(decodedString.get(j));
+                    }
+                    k--;
+                }
+            }
+            // push the current character to stack
+            else {
+                stack.push(s.charAt(i));
+            }
+        }      
+        // get the result from stack
+        char[] result = new char[stack.size()];
+        for (int i = result.length - 1; i >= 0; i--) {
+            result[i] = stack.pop();
+        }
+        return new String(result);
+    }
+}
+
+
