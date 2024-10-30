@@ -79,4 +79,36 @@ so each subproblem is only solved once. The time complexity is \(O(n^2)\), as th
 and each recursive call is computed once due to memoization. The space complexity is also \(O(n^2)\) for the `memo` table.
 
 
+Approach 3
+
+
+APproach 3
+This approach optimizes the dynamic programming solution for finding the longest palindromic subsequence by using two 1D arrays, 
+`dp` and `dpPrev`, instead of a full 2D array. Here, `dp[j]` represents the length of the longest palindromic subsequence for the substring 
+ending at `j`, and `dpPrev` holds results from the previous row (or previous outer loop iteration) to save space. The logic follows: if characters 
+`s[i]` and `s[j]` match, then `dp[j] = dpPrev[j - 1] + 2`; otherwise, we take the maximum value of ignoring either character, `dp[j] = max(dpPrev[j], dp[j - 1])`.
+This yields a final answer of `dp[n - 1]`. The time complexity is \(O(n^2)\), while space complexity is reduced to \(O(n)\) by storing only two arrays rather 
+than a full \(n \times n\) matrix.
+
+class Solution {
+    public int longestPalindromeSubseq(String s) {
+        int n = s.length();
+        int[] dp = new int[n];
+        int[] dpPrev = new int[n];
+
+        for (int i = n - 1; i >= 0; --i) {
+            dp[i] = 1;
+            for (int j = i + 1; j < n; ++j) {
+                if (s.charAt(i) == s.charAt(j)) {
+                    dp[j] = dpPrev[j - 1] + 2;
+                } else {
+                    dp[j] = Math.max(dpPrev[j], dp[j - 1]);
+                }
+            }
+            dpPrev = dp.clone();
+        }
+
+        return dp[n - 1];
+    }
+}
 
