@@ -1,0 +1,133 @@
+
+Approach 1 BFS 
+The approach to finding the shortest transformation sequence from `beginWord` to `endWord` involves using breadth-first search (BFS) 
+to explore all possible transformations by changing one letter at a time. We start by checking if the `endWord` is in the given `wordList`.
+If it’s not, we return `0`. We initialize a queue with the `beginWord` and a transformation count of `1`. As we dequeue elements,
+we generate new words by replacing each character in the current word with every letter from 'a' to 'z'. If a newly formed word matches
+the `endWord`, we return the count incremented by `1`. If a valid transformation exists in the `wordList`, it is added to the queue and
+removed from the set to prevent reprocessing. This process continues until the queue is empty or we find the `endWord`. The time complexity
+of this approach is \(O(N \times L \times 26)\), where \(N\) is the number of words in the `wordList` and \(L\) is the length of the longest word,
+while the space complexity is \(O(N)\) for storing the `wordList` in a set and for the BFS queue.
+
+import java.util.*;
+
+class Solution {
+    public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+        Set<String> wordSet = new HashSet<>(wordList);
+        
+        // If the endWord is not in the wordList, return 0
+        if (!wordSet.contains(endWord)) {
+            return 0;
+        }
+        
+        Queue<Pair<String, Integer>> queue = new LinkedList<>();
+        queue.offer(new Pair<>(beginWord, 1)); // (current word, transformation count)
+        
+        while (!queue.isEmpty()) {
+            Pair<String, Integer> current = queue.poll();
+            String currentWord = current.getKey();
+            int currentLevel = current.getValue();
+            
+            // Check all possible transformations
+            for (int i = 0; i < currentWord.length(); i++) {
+                char[] wordArray = currentWord.toCharArray();
+                
+                for (char c = 'a'; c <= 'z'; c++) {
+                    wordArray[i] = c; // Change one letter
+                    
+                    String newWord = new String(wordArray);
+                    
+                    // Check if the new word is the endWord
+                    if (newWord.equals(endWord)) {
+                        return currentLevel + 1;
+                    }
+                    
+                    // If the new word is in the word set, add to the queue and remove from the set
+                    if (wordSet.contains(newWord)) {
+                        queue.offer(new Pair<>(newWord, currentLevel + 1));
+                        wordSet.remove(newWord); // Prevent cycles
+                    }
+                }
+            }
+        }
+        
+        // If no transformation sequence is found
+        return 0;
+    }
+}
+
+
+Approach 2
+The optimized approach for finding the shortest transformation sequence from `beginWord` to `endWord` utilizes a bidirectional breadth-first search (BFS) strategy, 
+which significantly reduces the search space. We maintain two queues, one starting from `beginWord` and the other from `endWord`, 
+and alternate between expanding both sides until they meet in the middle. Each queue maintains a set of visited words to prevent
+re-exploration and optimize the search. We generate all possible transformations for the current word by changing one letter at 
+a time and checking against the `wordList`. If a generated word is found in the opposing search's visited set, we calculate the 
+total transformation length by combining the counts from both searches. If the `endWord` is not found in the `wordList`, 
+we return `0`. The time complexity of this approach is \(O(N \times L \times 26)\), where \(N\) is the number of words 
+in the `wordList` and \(L\) is the length of the longest word. The space complexity is \(O(N)\) due to the storage of 
+the `wordList` in a set and the queues used for BFS. This bidirectional search greatly improves efficiency, particularly
+for large datasets, by reducing the number of nodes explored.
+
+import java.util.*;
+
+class Solution {
+    public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+        Set<String> wordSet = new HashSet<>(wordList);
+        if (!wordSet.contains(endWord)) {
+            return 0; // Early exit if endWord is not in the wordList
+        }
+
+        Queue<String> beginQueue = new LinkedList<>();
+        Queue<String> endQueue = new LinkedList<>();
+        Set<String> beginVisited = new HashSet<>();
+        Set<String> endVisited = new HashSet<>();
+        
+        beginQueue.offer(beginWord);
+        endQueue.offer(endWord);
+        beginVisited.add(beginWord);
+        endVisited.add(endWord);
+        
+        int length = 1; // Initialize transformation length
+        
+        while (!beginQueue.isEmpty() && !endQueue.isEmpty()) {
+            // Alternate search direction
+            if (beginQueue.size() > endQueue.size()) {
+                Queue<String> tempQueue = beginQueue;
+                beginQueue = endQueue;
+                endQueue = tempQueue;
+                Set<String> tempVisited = beginVisited;
+                beginVisited = endVisited;
+                endVisited = tempVisited;
+            }
+            
+            int currentLevelSize = beginQueue.size();
+            for (int i = 0; i < currentLevelSize; i++) {
+                String currentWord = beginQueue.poll();
+
+                // Generate all possible transformations
+                for (int j = 0; j < currentWord.length(); j++) {
+                    char[] wordChars = currentWord.toCharArray();
+                    for (char c = 'a'; c <= 'z'; c++) {
+                        wordChars[j] = c; // Change one letter
+                        String nextWord = new String(wordChars);
+
+                        // Check if the transformed word is in the wordSet
+                        if (endVisited.contains(nextWord)) {
+                            return length + 1; // Found a connection
+                        }
+
+                        if (wordSet.contains(nextWord) && !beginVisited.contains(nextWord)) {
+                            beginQueue.offer(nextWord);
+                            beginVisited.add(nextWord);
+                        }
+                    }
+                }
+            }
+            length++; // Increment the length for the next level
+        }
+        
+        return 0; // No transformation sequence found
+    }
+}
+
