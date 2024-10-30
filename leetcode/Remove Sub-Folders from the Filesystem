@@ -1,0 +1,160 @@
+This approach removes subfolders by first inserting all folder paths into a set (`folderSet`) for fast lookup, 
+which takes \(O(N \cdot L)\) time, where \(N\) is the number of folders and \(L\) is the average folder path length.
+For each folder in the list, it checks if any of its parent directories are already in the set by iterating through
+its prefixes (up to \(L\) levels deep). For each level, finding the position of `/`, creating a substring, and checking
+in the set each take \(O(L)\), leading to \(O(L^2)\) time for each folder. Thus, the main operation over all folders takes
+\(O(N \cdot L^2)\). The overall time complexity is \(O(N \cdot L^2)\), and the space complexity is \(O(N \cdot L)\) for storing the folders in the set.
+class Solution {
+
+    public List<String> removeSubfolders(String[] folder) {
+        // Create a set to store all folder paths for fast lookup
+        Set<String> folderSet = new HashSet<>(Arrays.asList(folder));
+        List<String> result = new ArrayList<>();
+
+        // Iterate through each folder to check if it's a sub-folder
+        for (String f : folder) {
+            boolean isSubFolder = false;
+            String prefix = f;
+
+            // Check all prefixes of the current folder path
+            while (!prefix.isEmpty()) {
+                int pos = prefix.lastIndexOf('/');
+                if (pos == -1) break;
+
+                // Reduce the prefix to its parent folder
+                prefix = prefix.substring(0, pos);
+
+                // If the parent folder exists in the set, mark as sub-folder
+                if (folderSet.contains(prefix)) {
+                    isSubFolder = true;
+                    break;
+                }
+            }
+
+            // If not a sub-folder, add it to the result
+            if (!isSubFolder) {
+                result.add(f);
+            }
+        }
+
+
+
+
+        return result;
+    }
+}
+
+Approach 2 Using Sorting
+
+This approach removes subfolders by first sorting the folders alphabetically, so any subfolder directly follows its parent folder. 
+After sorting, it iterates through each folder and checks if it starts with the last added folder in the result list, appending a trailing 
+`/` to ensure it's a direct subfolder. If it’s not a subfolder, it’s added to the result. Sorting takes \(O(N \log N)\), and the iteration 
+through each folder to check the prefix takes \(O(N \cdot L)\), where \(N\) is the number of folders and \(L\) is the average length of the 
+folder path. The overall time complexity is \(O(N \log N + N \cdot L)\), and the space complexity is \(O(N \cdot L)\) for storing the sorted
+folders and the result list.
+class Solution {
+
+    public List<String> removeSubfolders(String[] folder) {
+        // Sort the folders alphabetically
+        Arrays.sort(folder);
+
+        // Initialize the result list and add the first folder
+        List<String> result = new ArrayList<>();
+        result.add(folder[0]);
+
+        // Iterate through each folder and check if it's a sub-folder of the last added folder in the result
+        for (int i = 1; i < folder.length; i++) {
+            String lastFolder = result.get(result.size() - 1);
+            lastFolder += '/';
+
+            // Check if the current folder starts with the last added folder path
+            if (!folder[i].startsWith(lastFolder)) {
+                result.add(folder[i]);
+            }
+        }
+
+        // Return the result containing only non-sub-folders
+        return result;
+    }
+}
+
+Approach 3 Using Trie
+This approach uses a Trie (prefix tree) to identify and exclude subfolders from a list of folder paths. First, it constructs a Trie, 
+where each folder path is split by `/` and stored in a hierarchy of Trie nodes. Each node represents a folder level, with a boolean flag 
+`isEndOfFolder` marking the end of a complete folder path. Then, to filter out subfolders, it iterates over each folder path, checking its
+segments against the Trie to see if an ancestor folder exists with `isEndOfFolder = true`. If found, the current path is skipped as a subfolder; 
+otherwise, it's added to the result list. 
+
+- **Time Complexity**: Building the Trie and performing lookups takes \(O(N \cdot L)\), where \(N\) is the number of 
+folders and \(L\) is the average length of each folder path split by `/`.
+- **Space Complexity**: The Trie requires \(O(N \cdot L)\) space to store all folder paths in the Trie structure.
+class Solution {
+
+    static class TrieNode {
+
+        boolean isEndOfFolder;
+        HashMap<String, TrieNode> children;
+
+        TrieNode() {
+            this.isEndOfFolder = false;
+            this.children = new HashMap<>();
+        }
+    }
+
+    TrieNode root;
+
+    Solution() {
+        this.root = new TrieNode();
+    }
+
+    public List<String> removeSubfolders(String[] folder) {
+        // Build Trie from folder paths
+        for (String path : folder) {
+            TrieNode currentNode = root;
+            String[] folderNames = path.split("/");
+
+            for (String folderName : folderNames) {
+                // Skip empty folder names
+                if (folderName.equals("")) continue;
+                // Create new node if it doesn't exist
+                if (!currentNode.children.containsKey(folderName)) {
+                    currentNode.children.put(folderName, new TrieNode());
+                }
+                currentNode = currentNode.children.get(folderName);
+            }
+            // Mark the end of the folder path
+            currentNode.isEndOfFolder = true;
+        }
+
+        // Check each path for subfolders
+        List<String> result = new ArrayList<>();
+        for (String path : folder) {
+            TrieNode currentNode = root;
+            String[] folderNames = path.split("/");
+            boolean isSubfolder = false;
+
+            for (int i = 0; i < folderNames.length; i++) {
+                // Skip empty folder names
+                if (folderNames[i].equals("")) continue;
+
+                TrieNode nextNode = currentNode.children.get(folderNames[i]);
+                // Check if the current folder path is a subfolder of an
+                // existing folder
+                if (nextNode.isEndOfFolder && i != folderNames.length - 1) {
+                    isSubfolder = true;
+                    break; // Found a sub-folder
+                }
+
+                currentNode = nextNode;
+            }
+            // If not a sub-folder, add to the result
+            if (!isSubfolder) result.add(path);
+        }
+
+        return result;
+    }
+}
+
+
+
+
