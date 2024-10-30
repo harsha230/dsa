@@ -1,0 +1,76 @@
+
+
+Approach 1 recursive
+
+The provided Java solution for regular expression matching employs a recursive approach to determine if the `text` fully matches the `pattern`, 
+supporting the `.` and `*` wildcard characters. The algorithm checks for base cases where the pattern is empty and uses a boolean flag to track 
+if the first characters match. If the pattern contains a `*`, it offers two recursive paths: skipping the `*` (assuming zero occurrences) or
+matching the first character and moving forward in the text. In cases without `*`, the algorithm simply advances both pointers if the first 
+characters match. This method exhibits a **time complexity of O(2^(m + n))**, where `m` is the length of `text` and `n` is the length of `pattern`, 
+due to the exponential growth of recursive calls. The **space complexity is O(m + n)**, primarily stemming from the recursion stack, which can reach 
+a depth proportional to the sum of the lengths of `text` and `pattern`. While straightforward, this approach can be inefficient for larger inputs,
+prompting the consideration of more optimal solutions like dynamic programming.
+
+class Solution {
+    public boolean isMatch(String text, String pattern) {
+        if (pattern.isEmpty()) return text.isEmpty();
+        boolean first_match =
+            (!text.isEmpty() &&
+                (pattern.charAt(0) == text.charAt(0) ||
+                    pattern.charAt(0) == '.'));
+
+        if (pattern.length() >= 2 && pattern.charAt(1) == '*') {
+            return (
+                isMatch(text, pattern.substring(2)) ||
+                (first_match && isMatch(text.substring(1), pattern))
+            );
+        } else {
+            return (
+                first_match && isMatch(text.substring(1), pattern.substring(1))
+            );
+        }
+    }
+}
+
+Approach 2 Dp with Memorization
+
+enum Result {
+    TRUE,
+    FALSE,
+}
+
+class Solution {
+    Result[][] memo;
+
+    public boolean isMatch(String text, String pattern) {
+        memo = new Result[text.length() + 1][pattern.length() + 1];
+        return dp(0, 0, text, pattern);
+    }
+
+    public boolean dp(int i, int j, String text, String pattern) {
+        if (memo[i][j] != null) {
+            return memo[i][j] == Result.TRUE;
+        }
+        boolean ans;
+        if (j == pattern.length()) {
+            ans = i == text.length();
+        } else {
+            boolean first_match =
+                (i < text.length() &&
+                    (pattern.charAt(j) == text.charAt(i) ||
+                        pattern.charAt(j) == '.'));
+
+            if (j + 1 < pattern.length() && pattern.charAt(j + 1) == '*') {
+                ans = (dp(i, j + 2, text, pattern) ||
+                    (first_match && dp(i + 1, j, text, pattern)));
+            } else {
+                ans = first_match && dp(i + 1, j + 1, text, pattern);
+            }
+        }
+        memo[i][j] = ans ? Result.TRUE : Result.FALSE;
+        return ans;
+    }
+}
+
+
+
