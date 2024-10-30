@@ -1,0 +1,82 @@
+This approach generates all possible subsequences of the input string `s` using bit manipulation, 
+then checks each subsequence to see if it's a palindrome. For each integer `i` from `1` to \(2^n - 1\),
+where `n` is the length of `s`, we treat the binary representation of `i` as a mask to decide which characters
+to include in the subsequence. Once a subsequence is built, we check if it's a palindrome, updating `maxLength` 
+if the current subsequence is the longest palindrome found so far. The time complexity of this approach is \(O(n \cdot 2^n)\), 
+as there are \(2^n\) subsequences and constructing each subsequence takes \(O(n)\) time. Checking if a subsequence is 
+a palindrome takes \(O(n)\), resulting in a total time complexity of \(O(n^2 \cdot 2^n)\). The space complexity is \(O(n)\) 
+due to the storage of subsequences and temporary strings.
+
+public class Solution {
+    public int longestPalindromeSubseq(String s) {
+        int n = s.length();
+        int maxLength = 0;
+
+        // Generate all possible subsequences (2^n combinations)
+        for (int i = 1; i < (1 << n); i++) {
+            StringBuilder subseq = new StringBuilder();
+            for (int j = 0; j < n; j++) {
+                if ((i & (1 << j)) != 0) {  // Check if jth bit is set
+                    subseq.append(s.charAt(j));
+                }
+            }
+            
+            // Check if subsequence is a palindrome
+            if (isPalindrome(subseq.toString())) {
+                maxLength = Math.max(maxLength, subseq.length());
+            }
+        }
+        
+        return maxLength;
+    }
+
+    private boolean isPalindrome(String str) {
+        int left = 0, right = str.length() - 1;
+        while (left < right) {
+            if (str.charAt(left) != str.charAt(right)) {
+                return false;
+            }
+            left++;
+            right--;
+        }
+        return true;
+    }
+}
+
+
+Approach 2
+class Solution {
+    public int longestPalindromeSubseq(String s) {
+        int n = s.length();
+        int[][] memo = new int[n][n];
+        return lps(s, 0, n - 1, memo);
+    }
+
+    private int lps(String s, int i, int j, int[][] memo) {
+        if (memo[i][j] != 0) {
+            return memo[i][j];
+        }
+        if (i > j) {
+            return 0;
+        }
+        if (i == j) {
+            return 1;
+        }
+
+        if (s.charAt(i) == s.charAt(j)) {
+            memo[i][j] = lps(s, i + 1, j - 1, memo) + 2;
+        } else {
+            memo[i][j] = Math.max(lps(s, i + 1, j, memo), lps(s, i, j - 1, memo));
+        }
+        return memo[i][j];
+    }
+}
+This approach uses memoization with recursion to find the longest palindromic subsequence in `s`. The function `lps` is 
+called recursively to compute the longest palindromic subsequence length between indices `i` and `j`. If `s.charAt(i)`
+and `s.charAt(j)` match, the length is increased by 2 plus the length of the longest palindromic subsequence between `i+1` and `j-1`;
+otherwise, the function takes the maximum length between excluding `i` or `j`. The `memo` array stores results for overlapping subproblems,
+so each subproblem is only solved once. The time complexity is \(O(n^2)\), as there are \(n \times n\) possible substrings to consider,
+and each recursive call is computed once due to memoization. The space complexity is also \(O(n^2)\) for the `memo` table.
+
+
+
