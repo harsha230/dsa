@@ -1,0 +1,133 @@
+Approach 1
+The Min-Heap approach for finding the K-th smallest element in a sorted 2D matrix leverages the sorted properties of the rows and columns.
+It initializes a Min-Heap with the first elements of up to `min(N, K)` rows, where `N` is the number of rows. It then repeatedly extracts 
+the smallest element (the root of the heap) and adds the next element from the same row until it has extracted `K` elements.
+The K-th extracted element is the desired result. This approach has a time complexity of \(O(K \log(\min(N, K)))\) due to the heap operations, 
+and a space complexity of \(O(\min(N, K))\) for storing the heap nodes.
+
+class MyHeapNode {
+
+  int row;
+  int column;
+  int value;
+
+  public MyHeapNode(int v, int r, int c) {
+    this.value = v;
+    this.row = r;
+    this.column = c;
+  }
+
+  public int getValue() {
+    return this.value;
+  }
+
+  public int getRow() {
+    return this.row;
+  }
+
+  public int getColumn() {
+    return this.column;
+  }
+}
+
+class MyHeapComparator implements Comparator<MyHeapNode> {
+  public int compare(MyHeapNode x, MyHeapNode y) {
+    return x.value - y.value;
+  }
+}
+
+class Solution {
+
+  public int kthSmallest(int[][] matrix, int k) {
+
+    int N = matrix.length;
+
+    PriorityQueue<MyHeapNode> minHeap =
+        new PriorityQueue<MyHeapNode>(Math.min(N, k), new MyHeapComparator());
+
+    // Preparing our min-heap
+    for (int r = 0; r < Math.min(N, k); r++) {
+
+      // We add triplets of information for each cell
+      minHeap.offer(new MyHeapNode(matrix[r][0], r, 0));
+    }
+
+    MyHeapNode element = minHeap.peek();
+    while (k-- > 0) {
+
+      // Extract-Min
+      element = minHeap.poll();
+      int r = element.getRow(), c = element.getColumn();
+
+      // If we have any new elements in the current row, add them
+      if (c < N - 1) {
+
+        minHeap.offer(new MyHeapNode(matrix[r][c + 1], r, c + 1));
+      }
+    }
+
+    return element.getValue();
+  }
+}
+
+
+Approach 2
+
+The provided `kthSmallest` method employs a binary search strategy to efficiently find the k-th smallest element in a sorted 2D matrix, 
+where both rows and columns are sorted in ascending order. The algorithm initializes the search range using the smallest (`start`) and largest (`end`) 
+elements in the matrix, and iteratively calculates a midpoint (`mid`). It uses the helper method `countLessEqual` to count how many elements are 
+less than or equal to `mid`, while also tracking the largest number less than or equal to `mid` and the smallest number greater than `mid`. 
+Depending on whether the count is less than, equal to, or greater than k, the search range is adjusted accordingly until the correct element is found.
+The time complexity of this approach is \(O(N \log(\text{max} - \text{min}))\), where \(N\) is the number of rows (or columns) in the matrix, and
+\(\text{max}\) and \(\text{min}\) refer to the maximum and minimum values in the matrix, respectively. The space complexity is \(O(1)\), 
+as it only uses a constant amount of additional space for variables.
+
+class Solution {
+
+  public int kthSmallest(int[][] matrix, int k) {
+
+    int n = matrix.length;
+    int start = matrix[0][0], end = matrix[n - 1][n - 1];
+    while (start < end) {
+
+      int mid = start + (end - start) / 2;
+      // first number is the smallest and the second number is the largest
+      int[] smallLargePair = {matrix[0][0], matrix[n - 1][n - 1]};
+
+      int count = this.countLessEqual(matrix, mid, smallLargePair);
+
+      if (count == k) return smallLargePair[0];
+
+      if (count < k) start = smallLargePair[1]; // search higher
+      else end = smallLargePair[0]; // search lower
+    }
+    return start;
+  }
+
+  private int countLessEqual(int[][] matrix, int mid, int[] smallLargePair) {
+
+    int count = 0;
+    int n = matrix.length, row = n - 1, col = 0;
+
+    while (row >= 0 && col < n) {
+
+      if (matrix[row][col] > mid) {
+
+        // as matrix[row][col] is bigger than the mid, let's keep track of the
+        // smallest number greater than the mid
+        smallLargePair[1] = Math.min(smallLargePair[1], matrix[row][col]);
+        row--;
+
+      } else {
+
+        // as matrix[row][col] is less than or equal to the mid, let's keep track of the
+        // biggest number less than or equal to the mid
+        smallLargePair[0] = Math.max(smallLargePair[0], matrix[row][col]);
+        count += row + 1;
+        col++;
+      }
+    }
+
+    return count;
+  }
+}
