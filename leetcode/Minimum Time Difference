@@ -1,0 +1,77 @@
+Approach 1
+The provided solution calculates the minimum time difference between a list of time points given in "HH:MM" 
+format by first converting each time into minutes since midnight and storing them in an integer array. 
+After sorting the array, the algorithm iterates through it to find the minimum difference between each 
+pair of adjacent times. It also considers the circular nature of time by checking the difference between
+the last and first time points. Finally, it returns the minimum of these differences. The time complexity
+of the solution is **O(n log n)** due to the sorting step, while the space complexity is **O(n)** for storing the converted time points in minutes.
+class Solution {
+
+    public int findMinDifference(List<String> timePoints) {
+        // convert input to minutes
+        int[] minutes = new int[timePoints.size()];
+        for (int i = 0; i < timePoints.size(); i++) {
+            String time = timePoints.get(i);
+            int h = Integer.parseInt(time.substring(0, 2));
+            int m = Integer.parseInt(time.substring(3));
+            minutes[i] = h * 60 + m;
+        }
+
+        // sort times in ascending order
+        Arrays.sort(minutes);
+
+        // find minimum difference across adjacent elements
+        int ans = Integer.MAX_VALUE;
+        for (int i = 0; i < minutes.length - 1; i++) {
+            ans = Math.min(ans, minutes[i + 1] - minutes[i]);
+        }
+
+        // consider difference between last and first element
+        return Math.min(
+            ans,
+            24 * 60 - minutes[minutes.length - 1] + minutes[0]
+        );
+    }
+}
+Approach 2
+This approach converts each time point to minutes, marking each in a fixed-size boolean array where indices represent minutes of the day (0 to 1439).
+If a duplicate minute is found, it returns `0`, as the minimum difference is zero. After marking all minutes, it iterates through the array to 
+find the smallest difference between consecutive time points. To handle the circular nature of the 24-hour day, it calculates the difference
+between the last and first time points, ensuring all cases are covered. This solution operates with a **time complexity of O(N + M)**, 
+where \(N\) is the number of time points and \(M\) is a constant \(1440\) for the total minutes in a day. The **space complexity is O(1)**
+since the boolean array is of fixed size, independent of input size.
+
+class Solution {
+
+    public int findMinDifference(List<String> timePoints) {
+        // create buckets array for the times converted to minutes
+        boolean[] minutes = new boolean[24 * 60];
+        for (String time : timePoints) {
+            int min =
+                Integer.parseInt(time.substring(0, 2)) * 60 +
+                Integer.parseInt(time.substring(3));
+            if (minutes[min]) return 0;
+            minutes[min] = true;
+        }
+        int prevIndex = Integer.MAX_VALUE;
+        int firstIndex = Integer.MAX_VALUE;
+        int lastIndex = Integer.MAX_VALUE;
+        int ans = Integer.MAX_VALUE;
+
+        // find differences between adjacent elements in sorted array
+        for (int i = 0; i < 24 * 60; i++) {
+            if (minutes[i]) {
+                if (prevIndex != Integer.MAX_VALUE) {
+                    ans = Math.min(ans, i - prevIndex);
+                }
+                prevIndex = i;
+                if (firstIndex == Integer.MAX_VALUE) {
+                    firstIndex = i;
+                }
+                lastIndex = i;
+            }
+        }
+
+        return Math.min(ans, 24 * 60 - lastIndex + firstIndex);
+    }
+}
