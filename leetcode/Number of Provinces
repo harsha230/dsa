@@ -1,0 +1,139 @@
+Approach 1 Depth First Search
+The approach implemented in the `findCircleNum` function utilizes Depth-First Search (DFS) to count the number of connected components
+(or provinces) in a given adjacency matrix `isConnected`. Each province is represented by a group of directly or indirectly 
+connected nodes (cities). The algorithm iterates through each city, and when it finds an unvisited city, it increments the 
+province count and initiates a DFS from that city, marking all reachable cities as visited. This process continues until 
+all cities have been visited. The time complexity of this approach is \(O(n^2)\), where \(n\) is the number of cities, 
+as it requires scanning the adjacency matrix to find connections. The space complexity is \(O(n)\) for the `visit` array
+used to track visited cities during the DFS traversal.
+
+class Solution {
+    public void dfs(int node, int[][] isConnected, boolean[] visit) {
+        visit[node] = true;
+        for (int i = 0; i < isConnected.length; i++) {
+            if (isConnected[node][i] == 1 && !visit[i]) {
+                dfs(i, isConnected, visit);
+            }
+        }
+    }
+
+    public int findCircleNum(int[][] isConnected) {
+        int n = isConnected.length;
+        int numberOfComponents = 0;
+        boolean[] visit = new boolean[n];
+
+        for (int i = 0; i < n; i++) {
+            if (!visit[i]) {
+                numberOfComponents++;
+                dfs(i, isConnected, visit);
+            }
+        }
+
+        return numberOfComponents;
+    }
+}
+
+Approach 2
+
+The approach implemented in the `findCircleNum` function employs Breadth-First Search (BFS) to determine the number of connected components 
+(or provinces) in a given adjacency matrix `isConnected`. Each province corresponds to a group of cities that are directly or indirectly connected. 
+The algorithm iterates through each city, and upon encountering an unvisited city, it increments the province count and starts 
+a BFS traversal from that city. During the BFS, all reachable cities are marked as visited by utilizing a queue to explore neighboring cities.
+This process continues until all cities have been checked. The time complexity of this approach is \(O(n^2)\), where \(n\) is the number of cities,
+due to the need to scan the adjacency matrix for connections. The space complexity is \(O(n)\) for the `visit` array used to track
+visited cities during the BFS traversal.
+
+
+class Solution {
+    public void bfs(int node, int[][] isConnected, boolean[] visit) {
+        Queue<Integer> q = new LinkedList<>();
+        q.offer(node);
+        visit[node] = true;
+
+        while (!q.isEmpty()) {
+            node = q.poll();
+
+            for (int i = 0; i < isConnected.length; i++) {
+                if (isConnected[node][i] == 1 && !visit[i]) {
+                    q.offer(i);
+                    visit[i] = true;
+                }
+            }
+        }
+    }
+
+    public int findCircleNum(int[][] isConnected) {
+        int n = isConnected.length;
+        int numberOfComponents = 0;
+        boolean[] visit = new boolean[n];
+
+        for (int i = 0; i < n; i++) {
+            if (!visit[i]) {
+                numberOfComponents++;
+                bfs(i, isConnected, visit);
+            }
+        }
+
+        return numberOfComponents;
+    }
+}
+
+Approch 3
+
+The provided solution utilizes the Union-Find data structure to efficiently determine the number of connected components (or provinces)
+in a graph represented by an adjacency matrix `isConnected`. The `UnionFind` class manages the parent-child relationships and ranks 
+of the nodes, enabling efficient union and find operations. In the `findCircleNum` method, we initialize the Union-Find structure for
+`n` cities and start with the assumption that each city is its own province. We then iterate through the adjacency matrix, checking
+for connections between pairs of cities. If a connection exists and the cities belong to different components, we decrement the
+component count and union the two cities. Finally, the method returns the total number of unique components identified. 
+The time complexity of this approach is \(O(n^2)\), where \(n\) is the number of cities, due to the nested iteration over
+the adjacency matrix, while the space complexity is \(O(n)\) for the `parent` and `rank` arrays used in the Union-Find structure.
+
+
+class UnionFind {
+    int[] parent;
+    int[] rank;
+    public UnionFind(int size) {
+        parent = new int[size];
+        for (int i = 0; i < size; i++)
+            parent[i] = i;
+        rank = new int[size];
+    }
+    public int find(int x) {
+        if (parent[x] != x)
+            parent[x] = find(parent[x]);
+        return parent[x];
+    }
+    public void union_set(int x, int y) {
+        int xset = find(x), yset = find(y);
+        if (xset == yset) {
+            return;
+        } else if (rank[xset] < rank[yset]) {
+            parent[xset] = yset;
+        } else if (rank[xset] > rank[yset]) {
+            parent[yset] = xset;
+        } else {
+            parent[yset] = xset;
+            rank[xset]++;
+        }
+    }
+}
+
+class Solution {
+    public int findCircleNum(int[][] isConnected) {
+        int n = isConnected.length;
+        UnionFind dsu = new UnionFind(n);
+        int numberOfComponents = n;
+
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (isConnected[i][j] == 1 && dsu.find(i) != dsu.find(j)) {
+                    numberOfComponents--;
+                    dsu.union_set(i, j);
+                }
+            }
+        }
+
+        return numberOfComponents;
+    }
+}
