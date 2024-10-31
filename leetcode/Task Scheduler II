@@ -1,0 +1,36 @@
+Approach 1
+The given solution implements a task scheduler that determines the minimum number of days required to complete all tasks,
+adhering to a cooldown period specified by the `space` parameter for each task type. It uses a `HashMap` to keep track of 
+the last day a task was completed. For each task in the `tasks` array, the algorithm increments the `days` counter for 
+the current task and checks if it has been completed recently. If so, it calculates the next available day by adding the 
+`space` value to the last completed day. If the current day is less than the next available day, it updates `days` to that
+next available day to respect the cooldown. Finally, it updates the `HashMap` with the day the current task is completed.
+The time complexity of this approach is \(O(n)\), where \(n\) is the number of tasks, since it processes each task exactly once.
+The space complexity is \(O(k)\), where \(k\) is the number of unique task types stored in the `HashMap`.
+
+class Solution {
+    public long taskSchedulerII(int[] tasks, int space) {
+         long days = 0; // total days to complete all tasks
+        HashMap<Integer, Long> lastCompleted = new HashMap<>(); // tracks last completed day of each task type
+
+        for (int task : tasks) {
+            days++; // we need a day for the current task
+            
+            // If the task was completed recently, we need to wait
+            if (lastCompleted.containsKey(task)) {
+                long lastDay = lastCompleted.get(task);
+                long nextAvailableDay = lastDay + space + 1; // next available day for the task
+
+                // If we are on the same day or before the next available day, move forward
+                if (days < nextAvailableDay) {
+                    days = nextAvailableDay; // move to the next available day
+                }
+            }
+
+            // Update the last completed day for the current task
+            lastCompleted.put(task, days);
+        }
+
+        return days; // return the total number of days needed
+    }
+}
