@@ -1,0 +1,54 @@
+This approach iterates over each character in the string `s`, 
+checking conditions to validate it as a number. It uses flags 
+(`seenDigit`, `seenExponent`, and `seenDot`) to track digits, exponents, 
+and decimal points, respectively. If a digit is encountered, `seenDigit` 
+is set to `true`. A `+` or `-` is valid only at the start or immediately after 
+`e/E`. An `e` or `E` must come after a digit, can only appear once, and must be 
+followed by another digit. The `.` can appear only before `e/E` and only once. 
+If any character breaks these rules, the function returns `false`; otherwise,
+it checks if at least one digit was seen to confirm validity. The time complexity 
+is \(O(n)\) due to the single traversal of the string, and the space complexity is \(O(1)\), as it uses a constant amount of extra space.
+class Solution {
+    public boolean isNumber(String s) {
+        boolean seenDigit = false;
+        boolean seenExponent = false;
+        boolean seenDot = false;
+
+        for (int i = 0; i < s.length(); i++) {
+            char curr = s.charAt(i);
+            if (Character.isDigit(curr)) {
+                seenDigit = true;
+            } else if (curr == '+' || curr == '-') {
+                if (i > 0 && s.charAt(i - 1) != 'e' && s.charAt(i - 1) != 'E') {
+                    return false;
+                }
+            } else if (curr == 'e' || curr == 'E') {
+                if (seenExponent || !seenDigit) {
+                    return false;
+                }
+                seenExponent = true;
+                seenDigit = false;
+            } else if (curr == '.') {
+                if (seenDot || seenExponent) {
+                    return false;
+                }
+                seenDot = true;
+            } else {
+                return false;
+            }
+        }
+
+        return seenDigit;
+    }
+}
+Complexity Analysis
+
+Time complexity: O(N), where N is the length of s.
+
+We simply iterate over the input once.
+The number of operations we perform for each character 
+in the input is independent of the length of the string, and therefore only requires constant time. This results in N⋅O(1)=O(N).
+
+Space complexity: O(1).
+
+Regardless of the input size, we only store 3 variables, seenDigit, seenExponent, and seenDot.
