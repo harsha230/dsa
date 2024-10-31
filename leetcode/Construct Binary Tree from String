@@ -1,5 +1,3 @@
-
-
 Approach 1 Reursive
 
 The provided code implements a recursive approach to construct a binary tree from a given string representation, 
@@ -73,5 +71,61 @@ class Solution {
 }
 
 
-Approach 2 using stacks
+Approach 2 using stack
+
+This approach constructs a binary tree from a string by using a stack to manage node relationships and 
+parent-child associations. It iterates through the input string, parsing integer values for nodes and
+managing parentheses to build the tree structure. For each integer encountered, it creates a new `TreeNode`.
+If the stack has a parent node, the new node is added as the left or right child, based on availability. 
+A `(` signifies the start of a subtree, while `)` signals the end of the current subtree, prompting a pop 
+operation to return to the parent node. The root node is ultimately the first element in the stack.
+
+The **time complexity** is \(O(n)\), where \(n\) is the length of the string, as each character is processed once. 
+The **space complexity** is \(O(h)\), where \(h\) is the height of the tree, due to the stack potentially holding up
+to `h` nodes at once during the tree's construction.
+
+
+class Solution {
+     public TreeNode str2tree(String s) {
+        if (s == null || s.isEmpty()) return null;
+        
+        Stack<TreeNode> stack = new Stack<>();
+        int i = 0;
+        
+        while (i < s.length()) {
+            if (s.charAt(i) == ')') {
+                stack.pop(); // End of a subtree
+                i++;
+            } else if (s.charAt(i) == '(') {
+                i++; // Move to the next character after '('
+            } else { 
+                // Read the integer value (it can be multiple digits or negative)
+                int start = i;
+                while (i < s.length() && (Character.isDigit(s.charAt(i)) || s.charAt(i) == '-')) {
+                    i++;
+                }
+                int value = Integer.parseInt(s.substring(start, i));
+                
+                // Create a new node
+                TreeNode node = new TreeNode(value);
+                
+                // If the stack is not empty, attach the node
+                if (!stack.isEmpty()) {
+                    TreeNode parent = stack.peek();
+                    if (parent.left == null) {
+                        parent.left = node;
+                    } else {
+                        parent.right = node;
+                    }
+                }
+                
+                // Push the current node to the stack
+                stack.push(node);
+            }
+        }
+        
+        // The root of the tree is the first node pushed onto the stack
+        return stack.isEmpty() ? null : stack.get(0);
+    }
+}
 
