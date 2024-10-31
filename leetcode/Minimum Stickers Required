@@ -1,0 +1,125 @@
+The `StickerWordSolver` class uses a recursive depth-first search (DFS) approach combined with memoization 
+to solve the problem of determining the minimum number of stickers needed to form a target word.
+The algorithm begins by calculating the frequency of characters in the provided sticker and 
+initializes a memoization map to store results for previously computed target states. 
+The `dfs` function recursively tries to apply the sticker to the target word, 
+creating a new target that reflects the remaining characters after using the sticker.
+It leverages memoization to avoid redundant calculations for the same target. 
+If a sticker does not contribute to reducing the target, it returns `-1`. 
+The approach effectively explores all combinations of stickers and efficiently computes the minimum number of stickers required. 
+
+### Time Complexity
+The time complexity is \(O(2^n \cdot m)\), where \(n\) is the length of the target word and \(m\) 
+is the number of unique characters in the sticker since each state can lead to multiple recursive calls while creating new targets.
+
+### Space Complexity
+The space complexity is \(O(n + m)\), where \(n\) is for storing the target in the memoization map and
+\(m\) is for the frequency count arrays. The memoization map can grow to store results for all unique target states encountered during the recursion.
+import java.util.HashMap;
+import java.util.Map;
+
+public class StickerWordSolver {
+    
+    public int minStickers(String sticker, String word) {
+        // Step 1: Get letter frequency counts for both sticker and word
+        int[] stickerCount = new int[26];
+        for (char c : sticker.toCharArray()) {
+            stickerCount[c - 'a']++;
+        }
+        
+        // Step 2: Memoization map to store minimum stickers needed for different target states
+        Map<String, Integer> memo = new HashMap<>();
+        memo.put("", 0);  // Base case: No stickers are needed for an empty target word
+        
+        // Step 3: Start recursive DFS search with memoization
+        return dfs(stickerCount, word, memo);
+    }
+    
+    private int dfs(int[] stickerCount, String target, Map<String, Integer> memo) {
+        // Check if result for current target is already computed
+        if (memo.containsKey(target)) {
+            return memo.get(target);
+        }
+        
+        // Step 4: Calculate letter frequencies for the target
+        int[] targetCount = new int[26];
+        for (char c : target.toCharArray()) {
+            targetCount[c - 'a']++;
+        }
+        
+        // Step 5: Try to apply the sticker and build a new remaining target
+        StringBuilder newTarget = new StringBuilder();
+        for (int i = 0; i < 26; i++) {
+            if (targetCount[i] > 0) {
+                int remaining = targetCount[i] - stickerCount[i];
+                for (int j = 0; j < remaining; j++) {
+                    newTarget.append((char) (i + 'a'));
+                }
+            }
+        }
+        
+        // If the sticker does not contribute to reducing the target word, return -1
+        if (newTarget.length() == target.length()) {
+            memo.put(target, -1);
+            return -1;
+        }
+        
+        // Recursive call for new target and find minimum stickers required
+        int nextStickers = dfs(stickerCount, newTarget.toString(), memo);
+        if (nextStickers == -1) {
+            memo.put(target, -1);
+            return -1;
+        }
+        
+        // Save the result in memo and return the result
+        memo.put(target, 1 + nextStickers);
+        return 1 + nextStickers;
+    }
+
+    public static void main(String[] args) {
+        StickerWordSolver solver = new StickerWordSolver();
+        System.out.println(solver.minStickers("ban", "banana")); // Output: 3
+        System.out.println(solver.minStickers("abc", "def")); // Output: -1
+    }
+}
+
+Approach 2 Optimal
+
+The approach for the `minStickers` function involves using frequency arrays to count the occurrences of each letter in both the `sticker` and the `word`. 
+It first populates these arrays, then iterates through each letter of the alphabet to check how many stickers are needed to satisfy the letter requirements 
+of the `word`. If a letter in the `word` cannot be found in the `sticker`, the function returns -1. The required number of stickers for each letter is
+calculated using the formula \(\lceil \text{freqWord}[i] / \text{freqSticker}[i] \rceil\), updating the maximum required stickers accordingly. 
+The time complexity of this approach is \(O(n + m)\), where \(n\) is the length of the `word` and \(m\) is the length of the `sticker`, 
+while the space complexity is \(O(1)\) since it only uses fixed-size arrays for letter frequencies.
+
+public int minStickers(String sticker, String word) {
+    int[] freqWord = new int[26]; // Frequency array for the target word
+
+    // Populate frequency array for the word
+    for (char c : word.toCharArray()) {
+        freqWord[c - 'a']++;
+    }
+
+    int[] freqSticker = new int[26]; // Frequency array for the sticker
+
+    // Populate frequency array for the sticker
+    for (char c : sticker.toCharArray()) {
+        freqSticker[c - 'a']++;
+    }
+
+    int ans = 0; // Initialize answer
+
+    // Loop through each letter in the alphabet
+    for (int i = 0; i < 26; i++) {
+        if (freqWord[i] > 0) { // If the letter is in the word
+            if (freqSticker[i] == 0) return -1; // If the letter is not in the sticker, return -1
+
+            // Calculate the number of stickers needed for this letter and update ans
+            int required = (int) Math.ceil((double) freqWord[i] / freqSticker[i]);
+            ans = Math.max(ans, required);
+        }
+    }
+
+    return ans; // Return the minimum number of stickers required
+}
+
