@@ -1,0 +1,64 @@
+import java.util.*;
+
+class SparseMatrix {
+    List<Map<Integer, Integer>> matrix;
+    int rows, cols;
+
+    public SparseMatrix(int[][] mat) {
+        rows = mat.length;
+        cols = mat[0].length;
+        matrix = new ArrayList<>(rows);
+
+        for (int i = 0; i < rows; i++) {
+            Map<Integer, Integer> rowMap = new HashMap<>();
+            for (int j = 0; j < cols; j++) {
+                if (mat[i][j] != 0) {
+                    rowMap.put(j, mat[i][j]);
+                }
+            }
+            matrix.add(rowMap);
+        }
+    }
+
+    public Map<Integer, Integer> getRow(int row) {
+        return matrix.get(row);
+    }
+}
+
+public class SparseMatrixMultiplication {
+
+    public int[][] multiply(int[][] mat1, int[][] mat2) {
+        SparseMatrix sparseMat1 = new SparseMatrix(mat1);
+        SparseMatrix sparseMat2 = new SparseMatrix(transpose(mat2));
+
+        int m = sparseMat1.rows;
+        int n = sparseMat2.rows;
+        int[][] result = new int[m][n];
+
+        for (int i = 0; i < m; i++) {
+            Map<Integer, Integer> rowMap = sparseMat1.getRow(i);
+            for (int j = 0; j < n; j++) {
+                Map<Integer, Integer> colMap = sparseMat2.getRow(j);
+                int sum = 0;
+                for (int k : rowMap.keySet()) {
+                    if (colMap.containsKey(k)) {
+                        sum += rowMap.get(k) * colMap.get(k);
+                    }
+                }
+                result[i][j] = sum;
+            }
+        }
+        return result;
+    }
+
+    private int[][] transpose(int[][] matrix) {
+        int rows = matrix.length, cols = matrix[0].length;
+        int[][] transposed = new int[cols][rows];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                transposed[j][i] = matrix[i][j];
+            }
+        }
+        return transposed;
+    }
+}
